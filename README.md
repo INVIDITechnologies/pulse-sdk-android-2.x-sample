@@ -42,5 +42,5 @@ You may use this account in the testing of your application. Refer to the [conte
 
 ## Useful information
 
-- [The Ooyala Pulse SDK documentation](http://pulse-sdks.ooyala.com/android/latest/index.html)
+- [The Ooyala Pulse SDK documentation](http://pulse-sdks.ooyala.com/android_2/latest/)
 - [Ooyala Ad Products SDK Parameter Reference](http://support.ooyala.com/developers/ad-documentation/oadtech/ad_serving/dg/integration_sdk_parameter.html)
