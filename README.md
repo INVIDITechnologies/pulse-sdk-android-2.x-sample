@@ -22,9 +22,9 @@ This is absolutely **not** intended to be used in production or to outline best 
 
 ## Project structure
 
-The Pulse SDK is initialized in the [PulseManager](app/src/main/java/adtech/ooyala/com/pulseplayer/PulseManager/PulseManager.java).
+The Pulse SDK is initialized in the [PulseManager](app/src/main/java/com/ooyala/pulseplayer/PulseManager/PulseManager.java).
 
-A [List Activity](app/src/main/java/adtech/ooyala/com/pulseplayer/List/MainActivity.java) shows a list of available videos, along with some [metadata](app/src/main/java/adtech/ooyala/com/pulseplayer/utils/VideoItem.java). When a video is selected it is opened in a [VideoPlayerActivity](app/src/main/java/adtech/ooyala/com/pulseplayer/videoPlayer/VideoPlayerActivity.java).
+A [List Activity](app/src/main/java/com/ooyala/pulseplayer/List/MainActivity.java) shows a list of available videos, along with some [metadata](app/src/main/java/com/ooyala/pulseplayer/utils/VideoItem.java). When a video is selected it is opened in a [VideoPlayerActivity](app/src/main/java/com/ooyala/pulseplayer/videoPlayer/VideoPlayerActivity.java).
 
 The VideoPlayerActivity creates an instance of [PulseSession](http://pulse-sdks.ooyala.com/android_2/latest/com/ooyala/pulse/PulseSession.html) using the [Pulse](http://pulse-sdks.ooyala.com/android_2/latest/index.html?com/ooyala/pulse/Pulse.html) class. This PulseSession informs the PulseManager through the [PulseSessionListener](http://pulse-sdks.ooyala.com/android_2/latest/com/ooyala/pulse/PulseSessionListener.html) protocol when it is time to play ads or the content.
 
