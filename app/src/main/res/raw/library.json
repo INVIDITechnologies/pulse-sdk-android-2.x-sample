@@ -13,13 +13,6 @@
   "content-duration":  52,
   "content-url":       "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
 },{
-  "tags":              ["preroll4"],
-  "content-title":     "Preroll resumable",
-  "content-id":        "demo-preroll",
-  "midroll-positions": [],
-  "content-duration":  52,
-  "content-url":       "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
-},{
   "tags":              ["standard-midrolls"],
   "midroll-positions": [10, 20],
   "content-title":     "Midroll demo",
@@ -36,6 +29,23 @@
   "tags":             ["standard-linears"],
   "midroll-positions": [10, 20],
   "content-title":    "Pre-/mid-/postroll demo",
+  "content-id":       "demo",
+  "content-duration": 52,
+  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+},{
+  "tags":             ["standard-linears"],
+  "category":         "skip-always",
+  "midroll-positions": [10, 20],
+  "content-title":    "Pre-/mid-/postroll skippable",
+  "content-id":       "demo",
+  "content-duration": 52,
+  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+
+},{
+  "tags":             ["standard-linears"],
+  "category":         "skip-after-first",
+  "midroll-positions": [10, 20],
+  "content-title":    "Pre-/mid-/postroll skip after first",
   "content-id":       "demo",
   "content-duration": 52,
   "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
@@ -65,12 +75,12 @@
   "content-id":       "demo-preroll-timeout",
   "content-duration": 52,
   "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
-}, {
+},{
   "tags":             [],
   "content-title":    "Content timeout",
   "content-id":       "content-timeout",
   "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
-}, {
+},{
   "tags":             ["preroll-media-valid", "midroll-media-valid", "postroll-media-valid"],
   "midroll-positions": [10, 20],
   "content-title":    "Lazy Loaded Ads",

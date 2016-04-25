@@ -40,14 +40,6 @@ public class CustomVideoView extends VideoView {
     }
 
     @Override
-    public void start() {
-        super.start();
-        if (mListener != null){
-            mListener.onPlay();
-        }
-    }
-
-    @Override
     public void setVideoURI (Uri uri)
     {
         super.setVideoURI(uri);
@@ -63,6 +55,13 @@ public class CustomVideoView extends VideoView {
     public interface PlayPauseListener {
         void onPlay();
         void onPause();
+    }
+
+    public void play() {
+        start();
+        if (mListener != null){
+            mListener.onPlay();
+        }
     }
 }
 

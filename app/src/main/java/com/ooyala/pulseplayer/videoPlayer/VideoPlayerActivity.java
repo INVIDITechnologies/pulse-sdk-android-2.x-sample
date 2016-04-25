@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.MediaController;
 
 import com.ooyala.pulse.PulseVideoAd;
@@ -27,18 +29,20 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         //Create an instance of CustomVideoView that is responsible for displaying both ad video and content.
         CustomVideoView player = (CustomVideoView) findViewById(R.id.player) ;
+        Button skipButton = (Button) findViewById(R.id.skipBtn);
+        skipButton.setVisibility(View.INVISIBLE);
         MediaController controllBar = new MediaController(this);
 
         //Instantiate Pulse manager with selected data.
-        pulseManager = new PulseManager(videoItem, player, controllBar, this);
+        pulseManager = new PulseManager(videoItem, player, controllBar, skipButton, this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
         pulseManager.setOnClickThroughCallback(new PulseManager.ClickThroughCallback() {
             @Override
             public void onClicked(PulseVideoAd ad) {
-                if(ad.getClickThroughURL() != null){
-                    Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(ad.getClickThroughURL().toString()));
-                    startActivityForResult(intent, 1365);
+                if(ad.getClickthroughURL() != null){
+                    Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(ad.getClickthroughURL().toString()));
+                    startActivity(intent);
                 } else{
                     pulseManager.returnFromClickThrough();
                 }
@@ -64,6 +68,12 @@ public class VideoPlayerActivity extends AppCompatActivity {
         if ((resultCode == RESULT_OK || resultCode == RESULT_CANCELED) && requestCode == 1365) {
             pulseManager.returnFromClickThrough();
         }
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        pulseManager.setCallBackHandler(PulseManager.contentProgressHandler);
     }
 
     /**
