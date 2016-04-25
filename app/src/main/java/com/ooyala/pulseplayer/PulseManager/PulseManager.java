@@ -65,10 +65,7 @@ public class PulseManager implements PulseSessionListener {
         this.activity = activity;
 
         // Create and start a pulse session
-        ContentMetadata invalidContentMetadata = new ContentMetadata();
-        invalidContentMetadata.setDuration(-10);
         pulseSession = Pulse.createSession(getContentMetadata(), getRequestSettings());
-      //  pulseSession = Pulse.createSession(invalidContentMetadata, getRequestSettings());
         pulseSession.startSession(this);
 
         controlBar.setMediaPlayer(videoPlayer);
@@ -197,7 +194,6 @@ public class PulseManager implements PulseSessionListener {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 videoPlayer.seekTo((int) (currentContentProgress));
-                //videoPlayer.start();
                 videoPlayer.play();
             }
         });
@@ -474,6 +470,34 @@ public class PulseManager implements PulseSessionListener {
         }
     }
 
+    /**
+     * A helper method to update the ad skip button.
+     *
+     * @param currentAdPlayhead the ad playback progress.
+     */
+    private void updateSkipButton(int currentAdPlayhead){
+        if(currentPulseVideoAd.isSkippable() && !skipEnabled){
+            if (skipBtn.getVisibility() == View.VISIBLE){
+                int remainingTime = (int)(currentPulseVideoAd.getSkipOffset() - currentAdPlayhead);
+                skipBtn.setText(skipBtnText + Integer.toString(remainingTime));
+            }
+            if((currentPulseVideoAd.getSkipOffset() <= (currentAdPlayhead))){
+                skipBtn.setText(R.string.skip_ad);
+                skipEnabled = true;
+                skipBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        skipBtn.setVisibility(View.INVISIBLE);
+                        currentPulseVideoAd.adSkipped();
+                        adStarted = false;
+                        adPaused = false;
+                    }
+                });
+            }
+
+        }
+    }
+
     ////////////////////click through related methods///////////
     public void returnFromClickThrough() {
         Log.i("Pulse Demo Player","returnFromClickThrough is called");
@@ -532,32 +556,4 @@ public class PulseManager implements PulseSessionListener {
             }
         }
     };
-
-    /**
-     * A helper method to stop a handler by removing its callback method.
-     *
-     * @param currentPlayhead the handler that should be stopped.
-     */
-    private void updateSkipButton(int currentPlayhead){
-        if(currentPulseVideoAd.isSkippable() && !skipEnabled){
-            if (skipBtn.getVisibility() == View.VISIBLE){
-                int remainingTime = (int)(currentPulseVideoAd.getSkipOffset() - currentPlayhead);
-                skipBtn.setText(skipBtnText + Integer.toString(remainingTime));
-            }
-            if((currentPulseVideoAd.getSkipOffset() <= (currentPlayhead))){
-                skipBtn.setText(R.string.skip_ad);
-                skipEnabled = true;
-                skipBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        skipBtn.setVisibility(View.INVISIBLE);
-                        currentPulseVideoAd.adSkipped();
-                        adStarted = false;
-                        adPaused = false;
-                    }
-                });
-            }
-
-        }
-    }
 }
