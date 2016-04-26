@@ -487,6 +487,7 @@ public class PulseManager implements PulseSessionListener {
                 skipBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        skipBtn.setOnClickListener(null);
                         skipBtn.setVisibility(View.INVISIBLE);
                         currentPulseVideoAd.adSkipped();
                         adStarted = false;
@@ -551,7 +552,6 @@ public class PulseManager implements PulseSessionListener {
                     //Report ad video progress to Pulse SDK.
                     currentPulseVideoAd.adPositionChanged(currentAdProgress / 1000);
                     updateSkipButton((int)(currentAdProgress / 1000));
-
                 }
             }
         }
