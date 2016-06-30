@@ -4,34 +4,34 @@
   "content-id":        "demo-none",
   "midroll-positions": [],
   "content-duration":  52,
-  "content-url":       "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":       "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":              ["standard-prerolls"],
   "content-title":     "Preroll demo",
   "content-id":        "demo-preroll",
   "midroll-positions": [],
   "content-duration":  52,
-  "content-url":       "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":       "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":              ["standard-midrolls"],
   "midroll-positions": [10, 20],
   "content-title":     "Midroll demo",
   "content-id":        "demo-midroll",
   "content-duration":  52,
-  "content-url":       "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":       "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":             ["standard-postrolls"],
   "content-title":    "Postroll demo",
   "content-id":       "demo-postrolls",
   "content-duration": 52,
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":             ["standard-linears"],
   "midroll-positions": [10, 20],
   "content-title":    "Pre-/mid-/postroll demo",
   "content-id":       "demo",
   "content-duration": 52,
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":             ["standard-linears"],
   "category":         "skip-always",
@@ -39,7 +39,7 @@
   "content-title":    "Pre-/mid-/postroll skippable",
   "content-id":       "demo",
   "content-duration": 52,
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 
 },{
   "tags":             ["standard-linears"],
@@ -48,7 +48,7 @@
   "content-title":    "Pre-/mid-/postroll skip after first",
   "content-id":       "demo",
   "content-duration": 52,
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":             ["standard-linears"],
   "category":         "frequency-capped-1min",
@@ -56,34 +56,34 @@
   "content-title":    "Frequency capping 1min",
   "content-id":       "demo-freq-capping",
   "content-duration": 52,
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":             ["preroll-media-invalid"],
   "content-title":    "Preroll demo - Ad media file invalid",
   "content-id":       "demo-preroll-invalid",
   "content-duration": 52,
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":             ["preroll-media-timeout"],
   "content-title":    "Preroll demo - Ad media file timeout",
   "content-id":       "demo-preroll-timeout",
   "content-duration": 52,
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":             ["preroll-media-404"],
   "content-title":    "Preroll demo - Ad media file 404",
   "content-id":       "demo-preroll-timeout",
   "content-duration": 52,
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":             [],
   "content-title":    "Content timeout",
   "content-id":       "content-timeout",
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":             ["preroll-media-valid", "midroll-media-valid", "postroll-media-valid"],
   "midroll-positions": [10, 20],
   "content-title":    "Lazy Loaded Ads",
   "content-id":       "content-invalid",
-  "content-url":      "https://ia700408.us.archive.org/26/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 }]
