@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:id="@+id/pauseAdRelativeLayout">
+
+    <TextView
+        android:id="@+id/splashResumeTxtView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:visibility="visible"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:text="@string/Splash_Resume_Message"
+        android:layout_alignTop="@+id/pauseAdCloseImageView"
+        android:layout_alignBottom="@+id/pauseAdCloseImageView"
+        />
+
+    <ImageView android:id="@+id/pauseAdCloseImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/close_button_icon"
+        android:minHeight="0dp"
+        android:minWidth="0dp"
+        android:text="X" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/pauseAdCloseImageView"
+        android:layout_margin="10dp"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:adjustViewBounds="false"
+        android:layout_centerHorizontal="true"
+        />
+</RelativeLayout>
