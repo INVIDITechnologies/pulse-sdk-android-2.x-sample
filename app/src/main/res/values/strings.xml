@@ -1,8 +1,9 @@
 <resources>
-    <string name="app_name">PulsePlayer</string>
+    <string name="app_name">PauseAdTest</string>
     <string name="action_settings">Settings</string>
     <string name="resource_notfound">Video library not found</string>
+    <string name="title_activity_video_player">VideoPlayerActivity</string>
     <string name="skip_ad_remaining_time">Skip ad in  </string>
     <string name="skip_ad">Skip Ad</string>
-    <string name="title_activity_video_player">VideoPlayerActivity</string>
+    <string name="Splash_Resume_Message">Ad: Press play to resume content</string>
 </resources>

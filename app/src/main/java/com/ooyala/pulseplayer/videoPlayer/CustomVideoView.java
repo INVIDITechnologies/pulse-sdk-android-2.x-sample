@@ -14,6 +14,8 @@ public class CustomVideoView extends VideoView {
 
     private PlayPauseListener mListener;
     private Uri uri;
+    private boolean contentPaused = false;
+
 
     public CustomVideoView(Context context) {
         super(context);
@@ -34,8 +36,20 @@ public class CustomVideoView extends VideoView {
     @Override
     public void pause() {
         super.pause();
+        contentPaused = true;
         if (mListener != null) {
             mListener.onPause();
+        }
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        if (contentPaused) {
+            contentPaused = false;
+            if (mListener != null) {
+                mListener.onResume();
+            }
         }
     }
 
@@ -55,6 +69,7 @@ public class CustomVideoView extends VideoView {
     public interface PlayPauseListener {
         void onPlay();
         void onPause();
+        void onResume();
     }
 
     public void play() {
@@ -64,4 +79,5 @@ public class CustomVideoView extends VideoView {
         }
     }
 }
+
 
