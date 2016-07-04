@@ -6,6 +6,20 @@
   "content-duration":  52,
   "content-url":       "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
+  "tags":              ["pause"],
+  "content-title":     "Pause Ad",
+  "content-id":        "demo",
+  "midroll-positions": [],
+  "content-duration":  52,
+  "content-url":       "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
+},{
+  "tags":              ["allSupportedAds"],
+  "midroll-positions": [10, 20],
+  "content-title":     "All supported ads",
+  "content-id":        "demo",
+  "content-duration":  52,
+  "content-url":       "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
+},{
   "tags":              ["standard-prerolls"],
   "content-title":     "Preroll demo",
   "content-id":        "demo-preroll",

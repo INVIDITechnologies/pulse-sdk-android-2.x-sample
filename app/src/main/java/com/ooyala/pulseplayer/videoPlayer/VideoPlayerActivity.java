@@ -13,6 +13,8 @@ import com.ooyala.pulseplayer.PulseManager.PulseManager;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.utils.VideoItem;
 
+import java.net.URL;
+
 /**
  * An activity for playing ad video and content. This activity employs a PulseManager instance to manage the Pulse session.
  */
@@ -31,10 +33,13 @@ public class VideoPlayerActivity extends AppCompatActivity {
         CustomVideoView player = (CustomVideoView) findViewById(R.id.player) ;
         Button skipButton = (Button) findViewById(R.id.skipBtn);
         skipButton.setVisibility(View.INVISIBLE);
+
         MediaController controllBar = new MediaController(this);
 
+        CustomImageView imageView = (CustomImageView) findViewById(R.id.pauseAdLayout);
+
         //Instantiate Pulse manager with selected data.
-        pulseManager = new PulseManager(videoItem, player, controllBar, skipButton, this);
+        pulseManager = new PulseManager(videoItem, player, controllBar, skipButton, imageView, this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
         pulseManager.setOnClickThroughCallback(new PulseManager.ClickThroughCallback() {
@@ -44,6 +49,16 @@ public class VideoPlayerActivity extends AppCompatActivity {
                     Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(ad.getClickthroughURL().toString()));
                     startActivity(intent);
                 } else{
+                    pulseManager.returnFromClickThrough();
+                }
+            }
+
+            @Override
+            public void onPauseAdClicked(URL clickThroughUrl) {
+                if (clickThroughUrl != null) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(clickThroughUrl.toString()));
+                    startActivity(intent);
+                } else {
                     pulseManager.returnFromClickThrough();
                 }
             }
