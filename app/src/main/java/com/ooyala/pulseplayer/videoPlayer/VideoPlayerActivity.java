@@ -36,6 +36,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         MediaController controllBar = new MediaController(this);
 
+        //Create an instance of CustomImageView that is responsible for displaying pause ad.
         CustomImageView imageView = (CustomImageView) findViewById(R.id.pauseAdLayout);
 
         //Instantiate Pulse manager with selected data.

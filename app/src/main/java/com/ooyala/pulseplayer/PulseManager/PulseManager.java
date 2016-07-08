@@ -44,7 +44,6 @@ public class PulseManager implements PulseSessionListener  {
     private Uri videoContentUri;
     private MediaController controlBar;
     private Button skipBtn;
-    //private ImageView pauseImageView;
     private CustomImageView pauseImageView;
     private long currentContentProgress = 0;
     private boolean duringVideoContent = false, duringAd = false, duringPause = false;
@@ -58,7 +57,6 @@ public class PulseManager implements PulseSessionListener  {
     private float currentAdProgress = 0;
     private String skipBtnText = "Skip ad in ";
     private boolean skipEnabled = false;
-    private boolean pauseAdRequested = false;
 
     public static Handler contentProgressHandler;
     public static Handler playbackHandler = new Handler();
@@ -112,7 +110,6 @@ public class PulseManager implements PulseSessionListener  {
         //Pause the content playback and remove the player listener.
         Log.i("Pulse Demo Player", "Ad break started.");
         duringAd = false;
-        //videoPlayer.pause();
         videoPlayer.setMediaStateListener(null);
         videoPlayer.setOnPreparedListener(null);
         videoPlayer.setOnCompletionListener(null);
@@ -131,6 +128,74 @@ public class PulseManager implements PulseSessionListener  {
         currentPulseVideoAd = pulseVideoAd;
         adPlaybackTimeout = (long) timeout;
         playAdContent(timeout, pulseVideoAd);
+    }
+
+    /**
+     * Pulse SDK calls this method when pause ad should be displayed.
+     *
+     * @param pulsePauseAd The {@link PulsePauseAd} that should be displayed.
+     */
+    @Override
+    public void showPauseAd(PulsePauseAd pulsePauseAd) {
+        currentPulsePauseAd = pulsePauseAd;
+        if (!videoPlayer.isPlaying()) {
+            if (pauseImageView != null && currentPulsePauseAd != null) {
+                //Assign a listener to the imageView to monitor its image related events.
+                pauseImageView.setCustomeImgViewListener(new CustomImageView.CustomeImgViewListener() {
+                    @Override
+                    public void onCloseBtnCLicked() {
+                        // If user closed the pause ad, report adClosed to Pulse SDK.
+                        pauseImageView.setVisibility(View.INVISIBLE);
+                        currentPulsePauseAd.adClosed();
+                        currentPulsePauseAd = null;
+                    }
+
+                    @Override
+                    public void onPauseAdClicked() {
+                        // If user clicked on the pause ad, report adClickThroughTriggered to Pulse SDK.
+                        if (currentPulsePauseAd != null) {
+                            if (currentPulsePauseAd.getClickThroughUrl() != null) {
+                                currentPulsePauseAd.adClickThroughTriggered();
+                                clickThroughCallback.onPauseAdClicked(currentPulsePauseAd.getClickThroughUrl());
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onImageDisplayed() {
+                        // If resource was successfully loaded and player is still in paused mode, report adDisplayed to Pulse SDK.
+                        if (!videoPlayer.isPlaying()){
+                            pauseImageView.setVisibility(View.VISIBLE);
+                            if (currentPulsePauseAd != null) {
+                                currentPulsePauseAd.adDisplayed();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onImageLoadingFailed(PulseAdError error) {
+                        // If loading resource failed report the error to Pulse SDK.
+                        if (currentPulsePauseAd != null) {
+                            currentPulsePauseAd.adFailed(error);
+                        }
+                    }
+                });
+
+                // Set up the imageView to show the pause ad.
+                pauseImageView.init();
+                // Get the mime type of the pause ad resource.
+                String pauseAdType = currentPulsePauseAd.getResourceType();
+                // Verify if the resource format is supported.
+                if (pauseAdType.equals("image/jpeg")) {
+                    URL srcUrl = currentPulsePauseAd.getResourceUrl();
+                    // If the resource is reachable, try loading the resource.
+                    if (srcUrl != null) {
+                        pauseImageView.loadImage(srcUrl);
+                    }
+                }
+            }
+
+        }
     }
 
     /**
@@ -165,63 +230,6 @@ public class PulseManager implements PulseSessionListener  {
             pulseSession.stopSession();
             pulseSession = null;
             startContentPlayback();
-        }
-    }
-
-    @Override
-    public void startPauseAdDisplay(PulsePauseAd pulsePauseAd) {
-        currentPulsePauseAd = pulsePauseAd;
-        Log.i("Pulse Demo Player", "Pulse signaled pause ad display");
-        if (!videoPlayer.isPlaying()) {
-            if (pauseImageView != null && currentPulsePauseAd != null) {
-                pauseAdRequested = true;
-                //pauseImageView = new CustomImageView(activity.getApplicationContext());
-
-                pauseImageView.setCustomeImgViewListener(new CustomImageView.CustomeImgViewListener() {
-                    @Override
-                    public void onCloseBtnCLicked() {
-                        pauseImageView.setVisibility(View.INVISIBLE);
-                        currentPulsePauseAd.adClosed();
-                        currentPulsePauseAd = null;
-                    }
-
-                    @Override
-                    public void onPauseAdClicked() {
-                        if (currentPulsePauseAd != null) {
-                            if (currentPulsePauseAd.getClickThroughUrl() != null) {
-                                currentPulsePauseAd.adClickThroughTriggered();
-                                clickThroughCallback.onPauseAdClicked(currentPulsePauseAd.getClickThroughUrl());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onImageDisplayed() {
-                        pauseImageView.setVisibility(View.VISIBLE);
-                        if (currentPulsePauseAd != null) {
-                            currentPulsePauseAd.adDisplayed();
-                        }
-                    }
-
-                    @Override
-                    public void onImageLoadingFailed(PulseAdError error) {
-                        if (currentPulsePauseAd != null) {
-                            currentPulsePauseAd.adFailed(error);
-                        }
-                    }
-                });
-
-                pauseImageView.init();
-
-                String pauseAdType = currentPulsePauseAd.getResourceType();
-                if (pauseAdType.equals("image/jpeg")) {
-                    URL srcUrl = currentPulsePauseAd.getResourceUrl();
-                    if (srcUrl != null) {
-                        pauseImageView.loadImage(srcUrl);
-                    }
-                }
-            }
-
         }
     }
 
@@ -548,13 +556,7 @@ public class PulseManager implements PulseSessionListener  {
     private ContentMetadata getContentMetadata() {
         ContentMetadata contentMetadata = new ContentMetadata();
         contentMetadata.setTags(new ArrayList<>(Arrays.asList(videoItem.getTags())));
-        /*if (videoItem.getTags() != null) {
-            for (String str : videoItem.getTags()) {
-                if (str.equals("pausead4") || str.equals("sessionads")) {
-                    pauseAdRequested = true;
-                }
-            }
-        }*/
+        contentMetadata.setCategory(videoItem.getCategory());
         return contentMetadata;
     }
 
@@ -615,7 +617,6 @@ public class PulseManager implements PulseSessionListener  {
 
     ////////////////////click through related methods///////////
     public void returnFromClickThrough() {
-        Log.i("Pulse Demo Player", "returnFromClickThrough is called");
         if (duringAd) {
             resumeAdPlayback();
         }

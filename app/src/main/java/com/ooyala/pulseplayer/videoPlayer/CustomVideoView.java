@@ -65,7 +65,7 @@ public class CustomVideoView extends VideoView {
         return uri;
     }
 
-    //An interface created to report when the content is played and paused.
+    //An interface created to report when the content is played, paused, and resumed.
     public interface PlayPauseListener {
         void onPlay();
         void onPause();

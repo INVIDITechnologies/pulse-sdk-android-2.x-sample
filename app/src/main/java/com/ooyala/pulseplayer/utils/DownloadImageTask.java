@@ -9,35 +9,49 @@ import android.widget.ImageView;
 import com.ooyala.pulse.PulseAdError;
 
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 
 /**
- * Created by Mehdi on 14/06/16.
+ * DownloadImageTask class created to provide an asynchronous loading of an image into an imageView.
  */
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-        OnImageLoaderListener listener;
+    private final WeakReference<ImageView> imageViewReference;
+    OnImageLoaderListener listener;
 
-        public DownloadImageTask(ImageView bmImage, OnImageLoaderListener listener) {
-            this.bmImage = bmImage;
-            this.listener = listener;
+    public DownloadImageTask(ImageView bmImage, OnImageLoaderListener listener) {
+        // Use a WeakReference to ensure the ImageView can be garbage collected.
+        imageViewReference = new WeakReference<ImageView>(bmImage);
+        this.listener = listener;
+    }
+
+    protected Bitmap doInBackground(String... urls) {
+        String urldisplay = urls[0];
+        Bitmap mIcon11 = null;
+        try {
+            InputStream in = new java.net.URL(urldisplay).openStream();
+            mIcon11 = BitmapFactory.decodeStream(in);
+        } catch (Exception e) {
+            Log.e("Error", e.getMessage());
+            e.printStackTrace();
+            listener.imageLoadingFailed(PulseAdError.NO_SUPPORTED_MEDIA_FILE);
         }
+        return mIcon11;
+    }
 
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-                listener.imageLoadingFailed(PulseAdError.NO_SUPPORTED_MEDIA_FILE);
+    protected void onPostExecute(Bitmap bitmap) {
+        if (imageViewReference != null && bitmap != null) {
+            final ImageView imageView = imageViewReference.get();
+            if (imageView != null) {
+                imageView.setImageBitmap(bitmap);
+                listener.imageLoaded();
             }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-            listener.imageLoaded();
         }
     }
+
+    //An interface created to report if the image was loaded or failed loading.
+    public interface OnImageLoaderListener {
+        void imageLoaded();
+        void imageLoadingFailed(PulseAdError error);
+    }
+}
+

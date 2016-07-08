@@ -2,7 +2,6 @@ package com.ooyala.pulseplayer.videoPlayer;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -11,14 +10,13 @@ import android.widget.TextView;
 import com.ooyala.pulse.PulseAdError;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.utils.DownloadImageTask;
-import com.ooyala.pulseplayer.utils.OnImageLoaderListener;
 
 import java.net.URL;
 
 /**
- * Created by Mehdi on 20/06/16.
+ * CustomImageView class containing a custom imageView with callbacks for asynchronous image loading.
  */
-public class CustomImageView extends RelativeLayout implements OnImageLoaderListener, View.OnClickListener {
+public class CustomImageView extends RelativeLayout implements DownloadImageTask.OnImageLoaderListener {
 
     private ImageView imageView,closeBtnImgView;
     private TextView splashResumeTxtView;
@@ -41,7 +39,7 @@ public class CustomImageView extends RelativeLayout implements OnImageLoaderList
         this.context = context;
 
     }
-
+    //Enable Setting a listener for loading image events and closing the view events.
     public void setCustomeImgViewListener (CustomeImgViewListener listener) {
         mListener = listener;
     }
@@ -77,12 +75,7 @@ public class CustomImageView extends RelativeLayout implements OnImageLoaderList
 
     }
 
-    @Override
-    public void onClick(View v) {
-
-        Log.i("Demo", "Onclosed Called : "+ v.getId());
-    }
-
+    //An interface created to report events related to image.
     public interface CustomeImgViewListener {
         void onCloseBtnCLicked();
         void onPauseAdClicked();
