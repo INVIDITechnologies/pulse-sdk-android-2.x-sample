@@ -137,6 +137,7 @@ public class PulseManager implements PulseSessionListener  {
      */
     @Override
     public void showPauseAd(PulsePauseAd pulsePauseAd) {
+        Log.i("Pulse Demo Player", "Pulse signaled pause ad display");
         currentPulsePauseAd = pulsePauseAd;
         if (!videoPlayer.isPlaying()) {
             if (pauseImageView != null && currentPulsePauseAd != null) {
@@ -227,6 +228,7 @@ public class PulseManager implements PulseSessionListener  {
         } else {
             // Don't know how to recover from this, stop the session and continue
             // with the content.
+            Log.i("Pulse Demo Player", error.getMessage());
             pulseSession.stopSession();
             pulseSession = null;
             startContentPlayback();
@@ -276,9 +278,9 @@ public class PulseManager implements PulseSessionListener  {
                     pauseImageView.setVisibility(View.INVISIBLE);
                     if (duringPause) {
                         currentPulsePauseAd = null;
-                        duringPause = false;
                     }
                 }
+                duringPause = false;
             }
         });
 
@@ -358,10 +360,7 @@ public class PulseManager implements PulseSessionListener  {
                     videoPlayer.setMediaStateListener(null);
                     resumeAdPlayback();
                 }
-                //If the we come back from browser during pause ad.
-                else if (duringPause) {
-                    Log.i("Pulse Demo Player", "Do Nothing For now");
-                } else {
+                else {
                     //If this is the first time this ad is played, report adStarted to Pulse.
                     if (!adStarted) {
                         adStarted = true;
