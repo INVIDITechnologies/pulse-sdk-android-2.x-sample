@@ -671,7 +671,9 @@ public class PulseManager implements PulseSessionListener  {
                 if (videoPlayer.getCurrentPosition() != 0) {
                     currentAdProgress = videoPlayer.getCurrentPosition();
                     //Report ad video progress to Pulse SDK.
-                    currentPulseVideoAd.adPositionChanged(currentAdProgress / 1000);
+                    if (currentPulseVideoAd != null){
+                        currentPulseVideoAd.adPositionChanged(currentAdProgress / 1000);
+                    }
                     updateSkipButton((int) (currentAdProgress / 1000));
                 }
             }
