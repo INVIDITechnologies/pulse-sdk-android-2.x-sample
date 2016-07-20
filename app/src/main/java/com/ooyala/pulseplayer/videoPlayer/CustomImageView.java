@@ -22,7 +22,7 @@ public class CustomImageView extends RelativeLayout implements DownloadImageTask
     private TextView splashResumeTxtView;
     private Context context;
 
-    private CustomeImgViewListener mListener;
+    private CustomImgViewListener mListener;
 
     public CustomImageView(Context context) {
         super(context);
@@ -40,7 +40,7 @@ public class CustomImageView extends RelativeLayout implements DownloadImageTask
 
     }
     //Enable Setting a listener for loading image events and closing the view events.
-    public void setCustomeImgViewListener (CustomeImgViewListener listener) {
+    public void setCustomImgViewListener(CustomImgViewListener listener) {
         mListener = listener;
     }
 
@@ -76,7 +76,7 @@ public class CustomImageView extends RelativeLayout implements DownloadImageTask
     }
 
     //An interface created to report events related to image.
-    public interface CustomeImgViewListener {
+    public interface CustomImgViewListener {
         void onCloseBtnCLicked();
         void onPauseAdClicked();
         void onImageDisplayed();

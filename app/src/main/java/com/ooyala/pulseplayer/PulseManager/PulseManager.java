@@ -141,8 +141,8 @@ public class PulseManager implements PulseSessionListener  {
         currentPulsePauseAd = pulsePauseAd;
         if (!videoPlayer.isPlaying()) {
             if (pauseImageView != null && currentPulsePauseAd != null) {
-                //Assign a listener to the imageView to monitor its image related events.
-                pauseImageView.setCustomeImgViewListener(new CustomImageView.CustomeImgViewListener() {
+                //Assign a listener to the custom imageView to monitor its image related events.
+                pauseImageView.setCustomImgViewListener(new CustomImageView.CustomImgViewListener() {
                     @Override
                     public void onCloseBtnCLicked() {
                         // If user closed the pause ad, report adClosed to Pulse SDK.
@@ -155,9 +155,9 @@ public class PulseManager implements PulseSessionListener  {
                     public void onPauseAdClicked() {
                         // If user clicked on the pause ad, report adClickThroughTriggered to Pulse SDK.
                         if (currentPulsePauseAd != null) {
-                            if (currentPulsePauseAd.getClickThroughUrl() != null) {
+                            if (currentPulsePauseAd.getClickThroughURL() != null) {
                                 currentPulsePauseAd.adClickThroughTriggered();
-                                clickThroughCallback.onPauseAdClicked(currentPulsePauseAd.getClickThroughUrl());
+                                clickThroughCallback.onPauseAdClicked(currentPulsePauseAd.getClickThroughURL());
                             }
                         }
                     }
@@ -165,7 +165,7 @@ public class PulseManager implements PulseSessionListener  {
                     @Override
                     public void onImageDisplayed() {
                         // If resource was successfully loaded and player is still in paused mode, report adDisplayed to Pulse SDK.
-                        if (!videoPlayer.isPlaying()){
+                        if (!videoPlayer.isPlaying()) {
                             pauseImageView.setVisibility(View.VISIBLE);
                             if (currentPulsePauseAd != null) {
                                 currentPulsePauseAd.adDisplayed();
@@ -188,14 +188,13 @@ public class PulseManager implements PulseSessionListener  {
                 String pauseAdType = currentPulsePauseAd.getResourceType();
                 // Verify if the resource format is supported.
                 if (pauseAdType.equals("image/jpeg")) {
-                    URL srcUrl = currentPulsePauseAd.getResourceUrl();
+                    URL srcUrl = currentPulsePauseAd.getResourceURL();
                     // If the resource is reachable, try loading the resource.
                     if (srcUrl != null) {
                         pauseImageView.loadImage(srcUrl);
                     }
                 }
             }
-
         }
     }
 
