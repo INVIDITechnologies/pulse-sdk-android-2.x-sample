@@ -18,6 +18,7 @@ import com.ooyala.pulse.PulseAdBreak;
 import com.ooyala.pulse.PulseAdError;
 import com.ooyala.pulse.PulsePauseAd;
 import com.ooyala.pulse.PulseSession;
+import com.ooyala.pulse.PulseSessionExtensionListener;
 import com.ooyala.pulse.PulseSessionListener;
 import com.ooyala.pulse.PulseVideoAd;
 import com.ooyala.pulseplayer.R;
@@ -28,6 +29,7 @@ import com.ooyala.pulseplayer.videoPlayer.CustomVideoView;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -57,6 +59,7 @@ public class PulseManager implements PulseSessionListener  {
     private float currentAdProgress = 0;
     private String skipBtnText = "Skip ad in ";
     private boolean skipEnabled = false;
+    private boolean isSessionExtensionRequested = false;
 
     public static Handler contentProgressHandler;
     public static Handler playbackHandler = new Handler();
@@ -664,6 +667,12 @@ public class PulseManager implements PulseSessionListener  {
                         pulseSession.contentPositionChanged(currentContentProgress / 1000);
                     }
                 }
+                if (videoItem.getContentTitle() != null && videoItem.getContentTitle().equals("Session extension") && !isSessionExtensionRequested) {
+                    if (Math.abs(currentContentProgress - 10000) < 100) {
+                        isSessionExtensionRequested = true;
+                        requestSessionExtension();
+                    }
+                }
 
             } else if (duringAd) {
                 if (videoPlayer.getCurrentPosition() != 0) {
@@ -677,6 +686,25 @@ public class PulseManager implements PulseSessionListener  {
             }
         }
     };
+
+
+    /////////////////////Session extension method//////////////////////
+    public void requestSessionExtension() {
+        Log.i("Pulse Demo Player", "Request a session extension for two midrolls at 20th second.");
+        ContentMetadata contentMetadata = getContentMetadata();
+        contentMetadata.setTags(Arrays.asList("standard-midrolls"));
+        RequestSettings requestSettings = getRequestSettings();
+        requestSettings.setLinearPlaybackPositions(Collections.singletonList(20f));
+        requestSettings.setInsertionPointFilter(Arrays.asList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
+
+        pulseSession.extendSession(contentMetadata, requestSettings, new PulseSessionExtensionListener() {
+            @Override
+            public void onComplete() {
+                Log.i("Pulse Demo Player", "Session was completely extended. There are now midroll ads at 20th second.");
+            }
+        });
+    }
+
 }
 
 
