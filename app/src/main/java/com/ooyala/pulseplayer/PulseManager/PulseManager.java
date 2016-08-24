@@ -667,8 +667,10 @@ public class PulseManager implements PulseSessionListener  {
                         pulseSession.contentPositionChanged(currentContentProgress / 1000);
                     }
                 }
+                //Check for session extension scenario.
                 if (videoItem.getContentTitle() != null && videoItem.getContentTitle().equals("Session extension") && !isSessionExtensionRequested) {
                     if (Math.abs(currentContentProgress - 10000) < 100) {
+                        //Set the flag to true so same session extension is not requested multiple times.
                         isSessionExtensionRequested = true;
                         requestSessionExtension();
                     }
@@ -691,12 +693,14 @@ public class PulseManager implements PulseSessionListener  {
     /////////////////////Session extension method//////////////////////
     public void requestSessionExtension() {
         Log.i("Pulse Demo Player", "Request a session extension for two midrolls at 20th second.");
+        //Modifying the initial ContentMetadata and RequestSetting to request for midrolls at 20 second.
         ContentMetadata contentMetadata = getContentMetadata();
         contentMetadata.setTags(Arrays.asList("standard-midrolls"));
         RequestSettings requestSettings = getRequestSettings();
         requestSettings.setLinearPlaybackPositions(Collections.singletonList(20f));
         requestSettings.setInsertionPointFilter(Arrays.asList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
-
+        //Make a session extension request and instantiate a PulseSessionExtensionListener.
+        //The onComplete callback would be called when the session is successfully extended.
         pulseSession.extendSession(contentMetadata, requestSettings, new PulseSessionExtensionListener() {
             @Override
             public void onComplete() {
