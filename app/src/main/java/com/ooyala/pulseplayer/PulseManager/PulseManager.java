@@ -110,7 +110,7 @@ public class PulseManager implements PulseSessionListener  {
      */
     @Override
     public void startAdBreak(PulseAdBreak pulseAdBreak) {
-        //Pause the content playback and remove the player listener.
+        //Remove the player listener.
         Log.i("Pulse Demo Player", "Ad break started.");
         duringAd = false;
         videoPlayer.setMediaStateListener(null);
@@ -694,17 +694,17 @@ public class PulseManager implements PulseSessionListener  {
     public void requestSessionExtension() {
         Log.i("Pulse Demo Player", "Request a session extension for two midrolls at 20th second.");
         //Modifying the initial ContentMetadata and RequestSetting to request for midrolls at 20 second.
-        ContentMetadata contentMetadata = getContentMetadata();
-        contentMetadata.setTags(Arrays.asList("standard-midrolls"));
-        RequestSettings requestSettings = getRequestSettings();
-        requestSettings.setLinearPlaybackPositions(Collections.singletonList(20f));
-        requestSettings.setInsertionPointFilter(Arrays.asList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
+        ContentMetadata updatedContentMetadata = getContentMetadata();
+        updatedContentMetadata.setTags(Arrays.asList("standard-midrolls"));
+        RequestSettings updatedRequestSettings = getRequestSettings();
+        updatedRequestSettings.setLinearPlaybackPositions(Collections.singletonList(20f));
+        updatedRequestSettings.setInsertionPointFilter(Arrays.asList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
         //Make a session extension request and instantiate a PulseSessionExtensionListener.
         //The onComplete callback would be called when the session is successfully extended.
-        pulseSession.extendSession(contentMetadata, requestSettings, new PulseSessionExtensionListener() {
+        pulseSession.extendSession(updatedContentMetadata, updatedRequestSettings, new PulseSessionExtensionListener() {
             @Override
             public void onComplete() {
-                Log.i("Pulse Demo Player", "Session was completely extended. There are now midroll ads at 20th second.");
+                Log.i("Pulse Demo Player", "Session was successfully extended. There are now midroll ads at 20th second.");
             }
         });
     }
