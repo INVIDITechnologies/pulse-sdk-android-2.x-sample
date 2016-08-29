@@ -18,6 +18,7 @@ import com.ooyala.pulse.PulseAdBreak;
 import com.ooyala.pulse.PulseAdError;
 import com.ooyala.pulse.PulsePauseAd;
 import com.ooyala.pulse.PulseSession;
+import com.ooyala.pulse.PulseSessionExtensionListener;
 import com.ooyala.pulse.PulseSessionListener;
 import com.ooyala.pulse.PulseVideoAd;
 import com.ooyala.pulseplayer.R;
@@ -28,6 +29,7 @@ import com.ooyala.pulseplayer.videoPlayer.CustomVideoView;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -57,6 +59,7 @@ public class PulseManager implements PulseSessionListener  {
     private float currentAdProgress = 0;
     private String skipBtnText = "Skip ad in ";
     private boolean skipEnabled = false;
+    private boolean isSessionExtensionRequested = false;
 
     public static Handler contentProgressHandler;
     public static Handler playbackHandler = new Handler();
@@ -107,7 +110,7 @@ public class PulseManager implements PulseSessionListener  {
      */
     @Override
     public void startAdBreak(PulseAdBreak pulseAdBreak) {
-        //Pause the content playback and remove the player listener.
+        //Remove the player listener.
         Log.i("Pulse Demo Player", "Ad break started.");
         duringAd = false;
         videoPlayer.setMediaStateListener(null);
@@ -664,6 +667,14 @@ public class PulseManager implements PulseSessionListener  {
                         pulseSession.contentPositionChanged(currentContentProgress / 1000);
                     }
                 }
+                //Check for session extension scenario.
+                if (videoItem.getContentTitle() != null && videoItem.getContentTitle().equals("Session extension") && !isSessionExtensionRequested) {
+                    if (Math.abs(currentContentProgress - 10000) < 100) {
+                        //Set the flag to true so same session extension is not requested multiple times.
+                        isSessionExtensionRequested = true;
+                        requestSessionExtension();
+                    }
+                }
 
             } else if (duringAd) {
                 if (videoPlayer.getCurrentPosition() != 0) {
@@ -677,6 +688,27 @@ public class PulseManager implements PulseSessionListener  {
             }
         }
     };
+
+
+    /////////////////////Session extension method//////////////////////
+    public void requestSessionExtension() {
+        Log.i("Pulse Demo Player", "Request a session extension for two midrolls at 20th second.");
+        //Modifying the initial ContentMetadata and RequestSetting to request for midrolls at 20 second.
+        ContentMetadata updatedContentMetadata = getContentMetadata();
+        updatedContentMetadata.setTags(Arrays.asList("standard-midrolls"));
+        RequestSettings updatedRequestSettings = getRequestSettings();
+        updatedRequestSettings.setLinearPlaybackPositions(Collections.singletonList(20f));
+        updatedRequestSettings.setInsertionPointFilter(Arrays.asList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
+        //Make a session extension request and instantiate a PulseSessionExtensionListener.
+        //The onComplete callback would be called when the session is successfully extended.
+        pulseSession.extendSession(updatedContentMetadata, updatedRequestSettings, new PulseSessionExtensionListener() {
+            @Override
+            public void onComplete() {
+                Log.i("Pulse Demo Player", "Session was successfully extended. There are now midroll ads at 20th second.");
+            }
+        });
+    }
+
 }
 
 
