@@ -274,6 +274,7 @@ public class PulseManager implements PulseSessionListener  {
                 duringVideoContent = true;
                 if (pulseSession != null) {
                     pulseSession.contentStarted();
+                    contentStarted = false;
                 }
 
                 if (pauseImageView.getVisibility() == View.VISIBLE) {
