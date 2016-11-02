@@ -32,5 +32,5 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
 
     //Change this line to match the downloaded Pulse SDK library.
-    compile (name:"pulse.2.3.16.14.0-release", ext:"aar")
+    compile (name:"pulse.2.3.16.21.0-debug", ext:"aar")
 }
