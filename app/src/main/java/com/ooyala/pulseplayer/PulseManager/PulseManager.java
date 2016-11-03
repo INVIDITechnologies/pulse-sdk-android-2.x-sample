@@ -274,6 +274,7 @@ public class PulseManager implements PulseSessionListener  {
                 duringVideoContent = true;
                 if (pulseSession != null) {
                     pulseSession.contentStarted();
+                    contentStarted = false;
                 }
 
                 if (pauseImageView.getVisibility() == View.VISIBLE) {
@@ -347,113 +348,125 @@ public class PulseManager implements PulseSessionListener  {
         controlBar.setVisibility(View.INVISIBLE);
         //Configure a handler to monitor playback timeout.
         playbackHandler.postDelayed(playbackRunnable, (long) (timeout * 1000));
-        String adUri = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles()).getURI().toString();
-        videoPlayer.setVideoURI(Uri.parse(adUri));
+        MediaFile mediaFile = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles());
+        if (mediaFile != null) {
+            String adUri = mediaFile.getURI().toString();
+            videoPlayer.setVideoURI(Uri.parse(adUri));
 
-        videoPlayer.setMediaStateListener(new CustomVideoView.PlayPauseListener() {
-            @Override
-            public void onPlay() {
-                duringAd = true;
-                skipEnabled = false;
-                //If the ad is played, remove the timeout handler.
-                playbackHandler.removeCallbacks(playbackRunnable);
-                //If the ad is resumed after being paused, call resumeAdPlayback.
-                if (adPaused) {
-                    videoPlayer.setMediaStateListener(null);
-                    resumeAdPlayback();
-                }
-                else {
-                    //If this is the first time this ad is played, report adStarted to Pulse.
-                    if (!adStarted) {
-                        adStarted = true;
-                        currentPulseVideoAd.adStarted();
+            videoPlayer.setMediaStateListener(new CustomVideoView.PlayPauseListener() {
+                @Override
+                public void onPlay() {
+                    duringAd = true;
+                    skipEnabled = false;
+                    //If the ad is played, remove the timeout handler.
+                    playbackHandler.removeCallbacks(playbackRunnable);
+                    //If the ad is resumed after being paused, call resumeAdPlayback.
+                    if (adPaused) {
+                        videoPlayer.setMediaStateListener(null);
+                        resumeAdPlayback();
                     }
-                    //If this ad is skippable, update the skip button.
-                    if (pulseVideoAd.isSkippable()) {
-                        skipBtn.setVisibility(View.VISIBLE);
-                        updateSkipButton(0);
-                    }
-                }
-            }
-
-            @Override
-            public void onPause() {
-                duringAd = false;
-                //Report ad paused to Pulse SDK.
-                pulseVideoAd.adPaused();
-                adPaused = true;
-            }
-
-            @Override
-            public void onResume() {
-
-            }
-        });
-
-        videoPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                videoPlayer.play();
-            }
-        });
-
-        //Assign an onTouchListener to player while displaying ad to support click through event.
-        videoPlayer.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (duringAd) {
-                        //Added to prevent click on the ads that are nor loaded yet which would prevent "ad paused before the ad played" error.
-                        videoPlayer.pause();
-                        duringAd = false;
-                        //Report ad clicked to Pulse SDK.
-                        currentPulseVideoAd.adClickThroughTriggered();
-                        videoPlayer.setOnTouchListener(null);
-                        clickThroughCallback.onClicked(currentPulseVideoAd);
-                        Log.i("Pulse Demo Player", "ClickThrough occurred.");
+                    else {
+                        //If this is the first time this ad is played, report adStarted to Pulse.
+                        if (!adStarted) {
+                            adStarted = true;
+                            currentPulseVideoAd.adStarted();
+                        }
+                        //If this ad is skippable, update the skip button.
+                        if (pulseVideoAd.isSkippable()) {
+                            skipBtn.setVisibility(View.VISIBLE);
+                            updateSkipButton(0);
+                        }
                     }
                 }
-                return false;
-            }
-        });
 
-        //Assign an onErrorListener to report the occurred error to Pulse SDK.
-        videoPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                switch (what) {
-                    case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-                        Log.i("Pulse Demo Player", "unknown media playback error");
-                        currentPulseVideoAd.adFailed(PulseAdError.NO_SUPPORTED_MEDIA_FILE);
-
-                        break;
-                    case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                        Log.i("Pulse Demo Player", "server connection died");
-                        currentPulseVideoAd.adFailed(PulseAdError.REQUEST_TIMED_OUT);
-                        break;
-                    default:
-                        Log.i("Pulse Demo Player", "generic audio playback error");
-                        currentPulseVideoAd.adFailed(PulseAdError.COULD_NOT_PLAY);
-                        break;
+                @Override
+                public void onPause() {
+                    duringAd = false;
+                    //Report ad paused to Pulse SDK.
+                    pulseVideoAd.adPaused();
+                    adPaused = true;
                 }
-                duringAd = false;
-                playbackHandler.removeCallbacks(playbackRunnable);
-                return true;
-            }
-        });
 
-        videoPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                duringAd = false;
-                Log.i("Pulse Demo Player", "Ad playback completed.");
-                //Report Ad completion to Pulse SDK.
-                skipBtn.setVisibility(View.INVISIBLE);
-                currentPulseVideoAd.adFinished();
-                adStarted = false;
-                adPaused = false;
-            }
-        });
+                @Override
+                public void onResume() {
+
+                }
+            });
+
+            videoPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    videoPlayer.play();
+                }
+            });
+
+            //Assign an onTouchListener to player while displaying ad to support click through event.
+            videoPlayer.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        if (duringAd) {
+                            //Added to prevent click on the ads that are nor loaded yet which would prevent "ad paused before the ad played" error.
+                            videoPlayer.pause();
+                            duringAd = false;
+                            //Report ad clicked to Pulse SDK.
+                            currentPulseVideoAd.adClickThroughTriggered();
+                            videoPlayer.setOnTouchListener(null);
+                            clickThroughCallback.onClicked(currentPulseVideoAd);
+                            Log.i("Pulse Demo Player", "ClickThrough occurred.");
+                        }
+                    }
+                    return false;
+                }
+            });
+
+            //Assign an onErrorListener to report the occurred error to Pulse SDK.
+            videoPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mp, int what, int extra) {
+                    switch (what) {
+                        case MediaPlayer.MEDIA_ERROR_UNKNOWN:
+                            Log.i("Pulse Demo Player", "unknown media playback error");
+                            currentPulseVideoAd.adFailed(PulseAdError.NO_SUPPORTED_MEDIA_FILE);
+
+                            break;
+                        case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
+                            Log.i("Pulse Demo Player", "server connection died");
+                            currentPulseVideoAd.adFailed(PulseAdError.REQUEST_TIMED_OUT);
+                            break;
+                        default:
+                            Log.i("Pulse Demo Player", "generic audio playback error");
+                            currentPulseVideoAd.adFailed(PulseAdError.COULD_NOT_PLAY);
+                            break;
+                    }
+                    duringAd = false;
+                    playbackHandler.removeCallbacks(playbackRunnable);
+                    return true;
+                }
+            });
+
+            videoPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    duringAd = false;
+                    Log.i("Pulse Demo Player", "Ad playback completed.");
+                    //Report Ad completion to Pulse SDK.
+                    skipBtn.setVisibility(View.INVISIBLE);
+                    currentPulseVideoAd.adFinished();
+                    adStarted = false;
+                    adPaused = false;
+                }
+            });
+        }
+        else {
+            playbackHandler.removeCallbacks(playbackRunnable);
+            duringAd = false;
+            Log.i("Pulse Demo Player", "Ad media file was not found.");
+            skipBtn.setVisibility(View.INVISIBLE);
+            currentPulseVideoAd.adFailed(PulseAdError.REQUEST_FAILED);
+            adStarted = false;
+            adPaused = false;
+        }
 
 
     }
@@ -546,6 +559,7 @@ public class PulseManager implements PulseSessionListener  {
             }
             newRequestSettings.setLinearPlaybackPositions(playbackPosition);
         }
+        newRequestSettings.setMaxBitRate(800);
         return newRequestSettings;
     }
 

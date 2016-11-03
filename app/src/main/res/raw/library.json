@@ -97,11 +97,6 @@
   "content-duration": 52,
   "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
-  "tags":             [],
-  "content-title":    "Content timeout",
-  "content-id":       "content-timeout",
-  "content-url":      "http://pulse-demo.cdn.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
-},{
   "tags":             ["preroll-media-valid", "midroll-media-valid", "postroll-media-valid"],
   "midroll-positions": [10, 20],
   "content-title":    "Lazy Loaded Ads",
