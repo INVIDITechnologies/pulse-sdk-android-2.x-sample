@@ -461,8 +461,7 @@ public class PulseManager implements PulseSessionListener  {
         else {
             playbackHandler.removeCallbacks(playbackRunnable);
             duringAd = false;
-            Log.i("Pulse Demo Player", "Ad playback completed.");
-            //Report Ad completion to Pulse SDK.
+            Log.i("Pulse Demo Player", "Ad media file was not found.");
             skipBtn.setVisibility(View.INVISIBLE);
             currentPulseVideoAd.adFailed(PulseAdError.REQUEST_FAILED);
             adStarted = false;
