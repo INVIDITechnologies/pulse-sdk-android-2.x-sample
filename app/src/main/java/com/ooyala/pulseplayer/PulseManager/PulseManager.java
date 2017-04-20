@@ -16,13 +16,16 @@ import com.ooyala.adtech.RequestSettings;
 import com.ooyala.pulse.Pulse;
 import com.ooyala.pulse.PulseAdBreak;
 import com.ooyala.pulse.PulseAdError;
+import com.ooyala.pulse.PulseCompanionAd;
 import com.ooyala.pulse.PulsePauseAd;
 import com.ooyala.pulse.PulseSession;
 import com.ooyala.pulse.PulseSessionExtensionListener;
 import com.ooyala.pulse.PulseSessionListener;
 import com.ooyala.pulse.PulseVideoAd;
+import com.ooyala.pulseplayer.BuildConfig;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.utils.VideoItem;
+import com.ooyala.pulseplayer.videoPlayer.CustomCompanionBannerView;
 import com.ooyala.pulseplayer.videoPlayer.CustomImageView;
 import com.ooyala.pulseplayer.videoPlayer.CustomVideoView;
 
@@ -30,8 +33,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 
 
 /**
@@ -47,8 +51,9 @@ public class PulseManager implements PulseSessionListener  {
     private MediaController controlBar;
     private Button skipBtn;
     private CustomImageView pauseImageView;
+    private CustomCompanionBannerView companionBannerViewTop, companionBannerViewBottom;
     private long currentContentProgress = 0;
-    private boolean duringVideoContent = false, duringAd = false, duringPause = false;
+    private boolean duringVideoContent = false, duringAd = false, duringPause = false, companionClicked = false;
     private boolean contentStarted = false;
     private boolean adPaused = false;
     private boolean adStarted = false;
@@ -60,19 +65,32 @@ public class PulseManager implements PulseSessionListener  {
     private String skipBtnText = "Skip ad in ";
     private boolean skipEnabled = false;
     private boolean isSessionExtensionRequested = false;
+    private List<String> availableCompanionBannerZones = new ArrayList();
 
     public static Handler contentProgressHandler;
     public static Handler playbackHandler = new Handler();
 
-    public PulseManager(VideoItem videoItem, CustomVideoView videoPlayer, MediaController controllBar, Button skipButton, CustomImageView imageView, Activity activity) {
+    public PulseManager(VideoItem videoItem, CustomVideoView videoPlayer, MediaController controllBar, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity) {
         this.videoItem = videoItem;
         this.videoPlayer = videoPlayer;
         this.controlBar = controllBar;
         this.skipBtn = skipButton;
         this.pauseImageView = imageView;
+        this.companionBannerViewTop = topcompanionBanner;
+        this.companionBannerViewBottom = bottomCompanionBanner;
+
+        //The companion banner zones can be assigned to the companion ad through Pulse Manager.
+        //In this sample app, we used the contentDescription element of banner views to indicate the desired zone.
+        if (companionBannerViewTop.getContentDescription() != null) {
+            availableCompanionBannerZones.add(companionBannerViewTop.getContentDescription().toString());
+        }
+        if (companionBannerViewBottom.getContentDescription() != null) {
+            availableCompanionBannerZones.add(companionBannerViewBottom.getContentDescription().toString());
+        }
+
         this.activity = activity;
 
-        // Create and start a pulse session
+      // Create and start a pulse session
         pulseSession = Pulse.createSession(getContentMetadata(), getRequestSettings());
         pulseSession.startSession(this);
 
@@ -131,6 +149,8 @@ public class PulseManager implements PulseSessionListener  {
         currentPulseVideoAd = pulseVideoAd;
         adPlaybackTimeout = (long) timeout;
         playAdContent(timeout, pulseVideoAd);
+        //Try to show the companion ads attached to this ad.
+        showCompanionAds(pulseVideoAd);
     }
 
     /**
@@ -142,7 +162,7 @@ public class PulseManager implements PulseSessionListener  {
     public void showPauseAd(PulsePauseAd pulsePauseAd) {
         Log.i("Pulse Demo Player", "Pulse signaled pause ad display");
         currentPulsePauseAd = pulsePauseAd;
-        if (!videoPlayer.isPlaying()) {
+        if (!videoPlayer.isPlaying() && !companionClicked) {
             if (pauseImageView != null && currentPulsePauseAd != null) {
                 //Assign a listener to the custom imageView to monitor its image related events.
                 pauseImageView.setCustomImgViewListener(new CustomImageView.CustomImgViewListener() {
@@ -520,6 +540,93 @@ public class PulseManager implements PulseSessionListener  {
         }
     }
 
+    /**
+     * Try to play the companion ads attached to the provided ad.
+     *
+     * @param pulseVideoAd The ad video.
+     */
+    public void showCompanionAds(PulseVideoAd pulseVideoAd) {
+      if (pulseVideoAd.getCompanions() != null) {
+        for (int i = 0 ; i < pulseVideoAd.getCompanions().size() ; i++) {
+          verifyCompanionAd(pulseVideoAd.getCompanions().get(i));
+        }
+      }
+    }
+
+    /**
+     * Verify that the provided companion ad can be displayed.
+     *
+     * @param companionAd The companion ad.
+     */
+    public void verifyCompanionAd(PulseCompanionAd companionAd) {
+      if (companionAd != null && verifyCompanionAdZone(companionAd)) {
+        if (companionAd.getZoneIdentifier().equals("companion-top")) {
+          displayComanionBanner(companionAd, companionBannerViewTop);
+        } else if (companionAd.getZoneIdentifier().equals("companion-bottom")) {
+          displayComanionBanner(companionAd, companionBannerViewBottom);
+        }
+      }
+    }
+
+    /**
+     * Initiate the companion banner view and display the provided companion banner.
+     *
+     * @param companionAd The companion ad.
+     * @param companionBannerView The custom companion banner view.
+     */
+    public void displayComanionBanner(final PulseCompanionAd companionAd, CustomCompanionBannerView companionBannerView)
+    {
+      //Assign a listener to the customCompanionBannerView to monitor its image related events.
+      companionBannerView.setCustomCompanionBannerViewListener(new CustomCompanionBannerView.CustomCompanionBannerViewListener() {
+        @Override
+        public void onCompanionBannerClicked() {
+          if (companionAd != null) {
+            companionClicked = true;
+            if (videoPlayer.isPlaying()) {
+              videoPlayer.pause();
+            }
+            if (companionAd.getClickThroughURL() != null) {
+              clickThroughCallback.onCompanionAdClicked(companionAd.getClickThroughURL());
+            }
+          }
+        }
+
+        @Override
+        public void onCompanionBannerDisplayed() {
+          companionAd.adDisplayed();
+        }
+      });
+
+      // Set up the imageView to show the pause ad.
+      companionBannerView.init();
+      // Get the mime type of the pause ad resource.
+      String companionAdType = companionAd.getResourceType();
+      if (companionAdType != null) {
+        // Verify if the resource format is supported.
+        if (companionAdType.equals("image/png")) {
+          URL srcUrl = companionAd.getResourceURL();
+          // If the resource is reachable, try loading the resource.
+          if (srcUrl != null) {
+            companionBannerView.loadImage(srcUrl);
+          }
+        }
+      }
+    }
+    /**
+     * Verify that the provided companion ad's zone matches one of the designated companion banner zones.
+     *
+     * @param companionAd The companion ad.
+     */
+    public boolean verifyCompanionAdZone(PulseCompanionAd companionAd) {
+      for (String str: availableCompanionBannerZones) {
+        if (companionAd != null) {
+          if (companionAd.getZoneIdentifier().equals(str)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
 
     ///////////////////Helper methods//////////////////////
 
@@ -560,6 +667,11 @@ public class PulseManager implements PulseSessionListener  {
             newRequestSettings.setLinearPlaybackPositions(playbackPosition);
         }
         newRequestSettings.setMaxBitRate(800);
+        newRequestSettings.setAdvertisingID("96bd03b6-defc-4203-83d3-dc1c730801f7");
+        newRequestSettings.setApplicationName("pulseplayer");
+        newRequestSettings.setApplicationVersion(BuildConfig.VERSION_NAME);
+        newRequestSettings.setApplicationID(BuildConfig.APPLICATION_ID);
+        newRequestSettings.setApplicationBundle("applicationBundle");
         return newRequestSettings;
     }
 
@@ -570,6 +682,7 @@ public class PulseManager implements PulseSessionListener  {
      */
     private ContentMetadata getContentMetadata() {
         ContentMetadata contentMetadata = new ContentMetadata();
+        contentMetadata.setContentProviderInformation("pcode","embed");
         contentMetadata.setTags(new ArrayList<>(Arrays.asList(videoItem.getTags())));
         contentMetadata.setCategory(videoItem.getCategory());
         return contentMetadata;
@@ -632,7 +745,14 @@ public class PulseManager implements PulseSessionListener  {
 
     ////////////////////click through related methods///////////
     public void returnFromClickThrough() {
-        if (duringAd) {
+        if (companionClicked) {
+//          if(duringAd) {
+//            resumeAdPlayback();
+//          }
+          companionClicked = false;
+        }
+        if (!duringPause) {
+            duringAd = true;
             resumeAdPlayback();
         }
     }
@@ -645,6 +765,8 @@ public class PulseManager implements PulseSessionListener  {
         void onClicked(PulseVideoAd ad);
 
         void onPauseAdClicked(URL url);
+
+        void onCompanionAdClicked(URL url);
     }
 
     /////////////////////Runnable methods//////////////////////
@@ -690,7 +812,7 @@ public class PulseManager implements PulseSessionListener  {
                     }
                 }
 
-            } else if (duringAd) {
+            } else if (duringAd && !companionClicked) {
                 if (videoPlayer.getCurrentPosition() != 0) {
                     currentAdProgress = videoPlayer.getCurrentPosition();
                     //Report ad video progress to Pulse SDK.
@@ -710,6 +832,7 @@ public class PulseManager implements PulseSessionListener  {
         //Modifying the initial ContentMetadata and RequestSetting to request for midrolls at 20 second.
         ContentMetadata updatedContentMetadata = getContentMetadata();
         updatedContentMetadata.setTags(Arrays.asList("standard-midrolls"));
+        updatedContentMetadata.setContentProviderInformation("pcode1","embed1");
         RequestSettings updatedRequestSettings = getRequestSettings();
         updatedRequestSettings.setLinearPlaybackPositions(Collections.singletonList(20f));
         updatedRequestSettings.setInsertionPointFilter(Arrays.asList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
