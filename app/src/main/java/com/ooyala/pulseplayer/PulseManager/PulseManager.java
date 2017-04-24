@@ -33,9 +33,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -162,6 +160,8 @@ public class PulseManager implements PulseSessionListener  {
     public void showPauseAd(PulsePauseAd pulsePauseAd) {
         Log.i("Pulse Demo Player", "Pulse signaled pause ad display");
         currentPulsePauseAd = pulsePauseAd;
+        //When companion banner is clicked, the content should be paused and pulseSession.contentPaused() should be reported.
+        //Considering that we don't want to display pause ad every time a companion banner is clicked, we check companionClicked flag in our showPauseAd implementation.
         if (!videoPlayer.isPlaying() && !companionClicked) {
             if (pauseImageView != null && currentPulsePauseAd != null) {
                 //Assign a listener to the custom imageView to monitor its image related events.
@@ -547,9 +547,10 @@ public class PulseManager implements PulseSessionListener  {
      */
     public void showCompanionAds(PulseVideoAd pulseVideoAd) {
       if (pulseVideoAd.getCompanions() != null) {
-        for (int i = 0 ; i < pulseVideoAd.getCompanions().size() ; i++) {
-          verifyCompanionAd(pulseVideoAd.getCompanions().get(i));
-        }
+          List<PulseCompanionAd> companionAds = pulseVideoAd.getCompanions();
+          for (int i = 0 ; i < companionAds.size() ; i++) {
+              verifyCompanionAd(companionAds.get(i));
+          }
       }
     }
 
@@ -561,9 +562,9 @@ public class PulseManager implements PulseSessionListener  {
     public void verifyCompanionAd(PulseCompanionAd companionAd) {
       if (companionAd != null && verifyCompanionAdZone(companionAd)) {
         if (companionAd.getZoneIdentifier().equals("companion-top")) {
-          displayComanionBanner(companionAd, companionBannerViewTop);
+          displayCompanionBanner(companionAd, companionBannerViewTop);
         } else if (companionAd.getZoneIdentifier().equals("companion-bottom")) {
-          displayComanionBanner(companionAd, companionBannerViewBottom);
+          displayCompanionBanner(companionAd, companionBannerViewBottom);
         }
       }
     }
@@ -574,7 +575,7 @@ public class PulseManager implements PulseSessionListener  {
      * @param companionAd The companion ad.
      * @param companionBannerView The custom companion banner view.
      */
-    public void displayComanionBanner(final PulseCompanionAd companionAd, CustomCompanionBannerView companionBannerView)
+    public void displayCompanionBanner(final PulseCompanionAd companionAd, CustomCompanionBannerView companionBannerView)
     {
       //Assign a listener to the customCompanionBannerView to monitor its image related events.
       companionBannerView.setCustomCompanionBannerViewListener(new CustomCompanionBannerView.CustomCompanionBannerViewListener() {
@@ -597,9 +598,9 @@ public class PulseManager implements PulseSessionListener  {
         }
       });
 
-      // Set up the imageView to show the pause ad.
+      // Set up the imageView to show the companion ad.
       companionBannerView.init();
-      // Get the mime type of the pause ad resource.
+      // Get the MIME type of the companion ad resource.
       String companionAdType = companionAd.getResourceType();
       if (companionAdType != null) {
         // Verify if the resource format is supported.

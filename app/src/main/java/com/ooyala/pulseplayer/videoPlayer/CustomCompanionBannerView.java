@@ -39,7 +39,7 @@ public class CustomCompanionBannerView extends LinearLayout implements DownloadI
   }
 
   public void init() {
-    View v = inflate(context, R.layout.customcompnaionbanner, this);
+    View v = inflate(context, R.layout.customcompanionbanner, this);
     LinearLayout linearLayout = (LinearLayout) v.findViewById(R.id.customCompanionBannerLayout);
 
     imageView = (ImageView) linearLayout.getChildAt(0);
