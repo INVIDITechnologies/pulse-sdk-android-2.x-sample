@@ -19,6 +19,7 @@ import java.net.URL;
  * An activity for playing ad video and content. This activity employs a PulseManager instance to manage the Pulse session.
  */
 public class VideoPlayerActivity extends AppCompatActivity {
+    static final int OPEN_BROWSER_REQUEST = 1365;
     public static PulseManager pulseManager;
 
     @Override
@@ -39,8 +40,12 @@ public class VideoPlayerActivity extends AppCompatActivity {
         //Create an instance of CustomImageView that is responsible for displaying pause ad.
         CustomImageView imageView = (CustomImageView) findViewById(R.id.pauseAdLayout);
 
+        //Create two instances of CustomCompanionBannerView that are responsible for displaying companion banner ads.
+        CustomCompanionBannerView companionBannerViewTop = (CustomCompanionBannerView) findViewById(R.id.companionTop);
+        CustomCompanionBannerView companionBannerViewBottom = (CustomCompanionBannerView) findViewById(R.id.companionBottom);
+
         //Instantiate Pulse manager with selected data.
-        pulseManager = new PulseManager(videoItem, player, controllBar, skipButton, imageView, this);
+        pulseManager = new PulseManager(videoItem, player, controllBar, skipButton, imageView, companionBannerViewTop, companionBannerViewBottom, this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
         pulseManager.setOnClickThroughCallback(new PulseManager.ClickThroughCallback() {
@@ -48,7 +53,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
             public void onClicked(PulseVideoAd ad) {
                 if(ad.getClickthroughURL() != null){
                     Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(ad.getClickthroughURL().toString()));
-                    startActivity(intent);
+                    startActivityForResult(intent, OPEN_BROWSER_REQUEST);
                 } else{
                     pulseManager.returnFromClickThrough();
                 }
@@ -58,11 +63,21 @@ public class VideoPlayerActivity extends AppCompatActivity {
             public void onPauseAdClicked(URL clickThroughUrl) {
                 if (clickThroughUrl != null) {
                     Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(clickThroughUrl.toString()));
-                    startActivity(intent);
+                    startActivityForResult(intent, OPEN_BROWSER_REQUEST);
                 } else {
                     pulseManager.returnFromClickThrough();
                 }
             }
+
+          @Override
+          public void onCompanionAdClicked(URL clickThroughUrl) {
+            if (clickThroughUrl != null) {
+              Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(clickThroughUrl.toString()));
+              startActivityForResult(intent, OPEN_BROWSER_REQUEST);
+            } else {
+              pulseManager.returnFromClickThrough();
+            }
+          }
         });
     }
 
@@ -81,7 +96,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if ((resultCode == RESULT_OK || resultCode == RESULT_CANCELED) && requestCode == 1365) {
+        if ((resultCode == RESULT_OK || resultCode == RESULT_CANCELED) && requestCode == OPEN_BROWSER_REQUEST) {
             pulseManager.returnFromClickThrough();
         }
     }
