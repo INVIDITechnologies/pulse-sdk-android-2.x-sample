@@ -9,8 +9,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.ooyala.adtech.LogItem;
-import com.ooyala.adtech.LogListener;
+import com.ooyala.pulse.LogItem;
+import com.ooyala.pulse.LogListener;
 import com.ooyala.pulse.Pulse;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.utils.VideoItem;
