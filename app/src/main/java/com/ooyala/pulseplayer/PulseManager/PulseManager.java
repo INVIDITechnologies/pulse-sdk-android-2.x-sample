@@ -10,12 +10,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.MediaController;
 
-import com.ooyala.adtech.ContentMetadata;
-import com.ooyala.adtech.MediaFile;
-import com.ooyala.adtech.RequestSettings;
 import com.ooyala.pulse.Pulse;
 import com.ooyala.pulse.PulseAdBreak;
 import com.ooyala.pulse.PulseAdError;
+import com.ooyala.pulse.ContentMetadata;
+import com.ooyala.pulse.RequestSettings;
+import com.ooyala.pulse.MediaFile;
+import com.ooyala.pulse.Error;
 import com.ooyala.pulse.PulseCompanionAd;
 import com.ooyala.pulse.PulsePauseAd;
 import com.ooyala.pulse.PulseSession;
@@ -242,7 +243,7 @@ public class PulseManager implements PulseSessionListener  {
      * @param error The produced error due to incorrect event report.
      */
     @Override
-    public void illegalOperationOccurred(com.ooyala.adtech.Error error) {
+    public void illegalOperationOccurred(Error error) {
         // In debug mode a runtime exception would be thrown in order to find and
         // correct mistakes in the integration.
         if (android.support.v7.appcompat.BuildConfig.DEBUG) {
