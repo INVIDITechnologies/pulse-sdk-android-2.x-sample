@@ -9,7 +9,7 @@ This is absolutely **not** intended to be used in production or to outline best 
 
 ## Building
 
-1. Download the Ooyala android SDK [here](http://support.ooyala.com/resources/mobile-and-client-sdks).
+1. Download the Ooyala video advertising android SDK [here](http://help.ooyala.com/downloads).
 
 2. Copy the SDK files to the [libs folder](app/libs).
 

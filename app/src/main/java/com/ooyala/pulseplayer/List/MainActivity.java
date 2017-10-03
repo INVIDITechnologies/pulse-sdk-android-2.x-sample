@@ -36,6 +36,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //Load json file containing VideoItems from resource.
         String videoJSonString = loadJSONFile(getResources().getIdentifier("raw/library", "raw", getPackageName()));
 
+        //Enable logging of debug messages.
+        Pulse.logDebugMessages(true);
+
         //Set a listener to receive low-level log messages about errors, warnings and the like.
         Pulse.setLogListener(new LogListener() {
             @Override
