@@ -427,14 +427,17 @@ public class PulseManager implements PulseSessionListener  {
                 public boolean onTouch(View v, MotionEvent event) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         if (duringAd) {
-                            //Added to prevent click on the ads that are nor loaded yet which would prevent "ad paused before the ad played" error.
-                            videoPlayer.pause();
-                            duringAd = false;
-                            //Report ad clicked to Pulse SDK.
-                            currentPulseVideoAd.adClickThroughTriggered();
-                            videoPlayer.setOnTouchListener(null);
-                            clickThroughCallback.onClicked(currentPulseVideoAd);
-                            Log.i("Pulse Demo Player", "ClickThrough occurred.");
+                            //If there is a clickthrouhg url, report adClickThroughTriggered event and try to open the url.
+                            if (currentPulseVideoAd.getClickthroughURL() != null) {
+                                //Added to prevent click on the ads that are not loaded yet which would prevent "ad paused before the ad played" error.
+                                duringAd = false;
+                                videoPlayer.pause();
+                                //Report ad clicked to Pulse SDK.
+                                currentPulseVideoAd.adClickThroughTriggered();
+                                videoPlayer.setOnTouchListener(null);
+                                clickThroughCallback.onClicked(currentPulseVideoAd);
+                                Log.i("Pulse Demo Player", "ClickThrough occurred.");
+                            }
                         }
                     }
                     return false;
@@ -584,11 +587,11 @@ public class PulseManager implements PulseSessionListener  {
         public void onCompanionBannerClicked() {
           if (companionAd != null) {
             companionClicked = true;
-            if (videoPlayer.isPlaying()) {
-              videoPlayer.pause();
-            }
             if (companionAd.getClickThroughURL() != null) {
-              clickThroughCallback.onCompanionAdClicked(companionAd.getClickThroughURL());
+                if (videoPlayer.isPlaying()) {
+                    videoPlayer.pause();
+                }
+                clickThroughCallback.onCompanionAdClicked(companionAd.getClickThroughURL());
             }
           }
         }
