@@ -1,6 +1,6 @@
-# Ooyala Pulse SDK 2.x sample integration for Android
+# INVIDI Pulse SDK 2.x sample integration for Android
 
-This project demonstrates a simple video player that requests and shows ads using the Ooyala Pulse SDK.
+This project demonstrates a simple video player that requests and shows ads using the INVIDI Pulse SDK.
 
 This project is a sample intended **only** to give a brief introduction to the Pulse SDK and help developers get started with their Android integration.
 
@@ -9,7 +9,7 @@ This is absolutely **not** intended to be used in production or to outline best 
 
 ## Building
 
-1. Download the Ooyala video advertising android SDK [here](http://help.ooyala.com/downloads).
+1. Download the INVIDI video advertising android SDK [here](https://service.videoplaza.tv/proxy/android-sdk/2/latest).
 
 2. Copy the SDK files to the [libs folder](app/libs).
 
@@ -35,11 +35,11 @@ This integration sample uses the following Pulse account:
 https://pulse-demo.videoplaza.tv
 ```
 
-This account is configured with a set of ad campaigns that help with testing an application that integrates with Ooyala Pulse.
+This account is configured with a set of ad campaigns that help with testing an application that integrates with INVIDI Pulse.
 
 You may use this account in the testing of your application. Refer to the [content library](app/src/main/res/raw/library.json) used in this sample for useful tags and categories.
 
 
 ## Useful information
 
-- [The Ooyala Pulse SDK documentation](http://pulse-sdks.ooyala.com/android_2/latest/)
+- [The INVIDI Pulse SDK documentation](http://pulse-sdks.ooyala.com/android_2/latest/)
