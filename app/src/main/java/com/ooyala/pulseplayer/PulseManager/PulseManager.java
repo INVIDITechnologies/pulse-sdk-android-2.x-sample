@@ -677,6 +677,9 @@ public class PulseManager implements PulseSessionListener  {
         newRequestSettings.setApplicationVersion(BuildConfig.VERSION_NAME);
         newRequestSettings.setApplicationID(BuildConfig.APPLICATION_ID);
         newRequestSettings.setApplicationBundle("applicationBundle");
+        newRequestSettings.setStartAdTimeout(1);
+        newRequestSettings.setThirdPartyTimeout(2);
+        newRequestSettings.setTotalPassbackTimeout(3);
         return newRequestSettings;
     }
 
