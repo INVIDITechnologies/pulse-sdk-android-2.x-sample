@@ -16,6 +16,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility = 1.8
+        sourceCompatibility = 1.8
+    }
 }
 
 repositories {
@@ -26,11 +30,12 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:support-v4:26.1.0'
     testImplementation 'junit:junit:4.12'
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support:design:26.1.0'
 
     //Change this line to match the downloaded Pulse SDK library.
     //implementation (name:"pulse.2.5.19.9.0", ext:"aar")
-    //implementation project(path: ':library')
+    implementation project(path: ':library')
 }

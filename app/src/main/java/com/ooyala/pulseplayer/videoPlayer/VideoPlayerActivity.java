@@ -33,6 +33,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         //Create an instance of CustomVideoView that is responsible for displaying both ad video and content.
         CustomVideoView player = (CustomVideoView) findViewById(R.id.player) ;
         Button skipButton = (Button) findViewById(R.id.skipBtn);
+
         skipButton.setVisibility(View.INVISIBLE);
 
         MediaController controllBar = new MediaController(this);
@@ -45,7 +46,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         CustomCompanionBannerView companionBannerViewBottom = (CustomCompanionBannerView) findViewById(R.id.companionBottom);
 
         //Instantiate Pulse manager with selected data.
-        pulseManager = new PulseManager(videoItem, player, controllBar, skipButton, imageView, companionBannerViewTop, companionBannerViewBottom, this);
+        pulseManager = new PulseManager(videoItem, player, controllBar, skipButton, imageView, companionBannerViewTop, companionBannerViewBottom, this, this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
         pulseManager.setOnClickThroughCallback(new PulseManager.ClickThroughCallback() {

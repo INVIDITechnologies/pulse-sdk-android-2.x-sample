@@ -1,6 +1,7 @@
 package com.ooyala.pulseplayer.PulseManager;
 
 import android.app.Activity;
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.MediaController;
 
+import com.ooyala.pulse.OmidAdSession;
 import com.ooyala.pulse.Pulse;
 import com.ooyala.pulse.PulseAdBreak;
 import com.ooyala.pulse.PulseAdError;
@@ -57,6 +59,7 @@ public class PulseManager implements PulseSessionListener  {
     private boolean adPaused = false;
     private boolean adStarted = false;
     private Activity activity;
+    private Context context;
     private VideoItem videoItem = new VideoItem();
     public ClickThroughCallback clickThroughCallback;
     private long adPlaybackTimeout = 0;
@@ -69,7 +72,7 @@ public class PulseManager implements PulseSessionListener  {
     public static Handler contentProgressHandler;
     public static Handler playbackHandler = new Handler();
 
-    public PulseManager(VideoItem videoItem, CustomVideoView videoPlayer, MediaController controllBar, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity) {
+    public PulseManager(VideoItem videoItem, CustomVideoView videoPlayer, MediaController controllBar, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
         this.videoItem = videoItem;
         this.videoPlayer = videoPlayer;
         this.controlBar = controllBar;
@@ -88,6 +91,7 @@ public class PulseManager implements PulseSessionListener  {
         }
 
         this.activity = activity;
+        this.context = context;
 
       // Create and start a pulse session
         pulseSession = Pulse.createSession(getContentMetadata(), getRequestSettings());
@@ -147,6 +151,7 @@ public class PulseManager implements PulseSessionListener  {
     public void startAdPlayback(PulseVideoAd pulseVideoAd, float timeout) {
         currentPulseVideoAd = pulseVideoAd;
         adPlaybackTimeout = (long) timeout;
+        OmidAdSession.createOmidSession(currentPulseVideoAd, context, videoPlayer, controlBar);
         playAdContent(timeout, pulseVideoAd);
         //Try to show the companion ads attached to this ad.
         showCompanionAds(pulseVideoAd);
@@ -366,7 +371,7 @@ public class PulseManager implements PulseSessionListener  {
      * @param pulseVideoAd The ad video.
      */
     public void playAdContent(float timeout, final PulseVideoAd pulseVideoAd) {
-        controlBar.setVisibility(View.INVISIBLE);
+        controlBar.setVisibility(View.VISIBLE);
         //Configure a handler to monitor playback timeout.
         playbackHandler.postDelayed(playbackRunnable, (long) (timeout * 1000));
         MediaFile mediaFile = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles());
@@ -452,7 +457,6 @@ public class PulseManager implements PulseSessionListener  {
                         case MediaPlayer.MEDIA_ERROR_UNKNOWN:
                             Log.i("Pulse Demo Player", "unknown media playback error");
                             currentPulseVideoAd.adFailed(PulseAdError.NO_SUPPORTED_MEDIA_FILE);
-
                             break;
                         case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
                             Log.i("Pulse Demo Player", "server connection died");
