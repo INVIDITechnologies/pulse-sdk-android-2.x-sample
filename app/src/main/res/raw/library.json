@@ -6,7 +6,6 @@
   "content-duration":  52,
   "content-url":       "http://pulse-demo.vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
-
   "tags":              ["om_vast4.1"],
   "content-title":     "Preroll demo",
   "content-id":        "demo-preroll",
@@ -27,7 +26,7 @@
   "content-duration": 52,
   "content-url":      "http://pulse-demo.vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
-  "tags":             ["standard-linears"],
+  "tags":             ["om_vast4.1"],
   "midroll-positions": [10, 20],
   "content-title":    "Pre-/mid-/postroll demo",
   "content-id":       "demo",

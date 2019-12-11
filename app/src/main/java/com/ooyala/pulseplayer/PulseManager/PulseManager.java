@@ -9,9 +9,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.MediaController;
 
 import com.ooyala.pulse.OmidAdSession;
+import com.ooyala.pulse.PlayerState;
 import com.ooyala.pulse.Pulse;
 import com.ooyala.pulse.PulseAdBreak;
 import com.ooyala.pulse.PulseAdError;
@@ -31,6 +31,7 @@ import com.ooyala.pulseplayer.utils.VideoItem;
 import com.ooyala.pulseplayer.videoPlayer.CustomCompanionBannerView;
 import com.ooyala.pulseplayer.videoPlayer.CustomImageView;
 import com.ooyala.pulseplayer.videoPlayer.CustomVideoView;
+import com.ooyala.pulseplayer.videoPlayer.CustomMediaController;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,9 +48,13 @@ public class PulseManager implements PulseSessionListener  {
     private PulseVideoAd currentPulseVideoAd;
     private PulsePauseAd currentPulsePauseAd;
 
-    private CustomVideoView videoPlayer;
+    public static CustomVideoView getVideoPlayer() {
+        return videoPlayer;
+    }
+
+    private static CustomVideoView videoPlayer;
     private Uri videoContentUri;
-    private MediaController controlBar;
+    private CustomMediaController controlBar;
     private Button skipBtn;
     private CustomImageView pauseImageView;
     private CustomCompanionBannerView companionBannerViewTop, companionBannerViewBottom;
@@ -71,8 +76,9 @@ public class PulseManager implements PulseSessionListener  {
 
     public static Handler contentProgressHandler;
     public static Handler playbackHandler = new Handler();
+    final int REQUEST_CODE = 5000;
 
-    public PulseManager(VideoItem videoItem, CustomVideoView videoPlayer, MediaController controllBar, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
+    public PulseManager(VideoItem videoItem, CustomVideoView videoPlayer, CustomMediaController controllBar, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
         this.videoItem = videoItem;
         this.videoPlayer = videoPlayer;
         this.controlBar = controllBar;
@@ -105,6 +111,21 @@ public class PulseManager implements PulseSessionListener  {
         contentProgressHandler = new Handler();
         contentProgressHandler.post(onEveryTimeInterval);
     }
+
+
+    private static PulseManager pulseManager = new PulseManager();
+
+    /* A private Constructor prevents any other
+     * class from instantiating.
+     */
+    private PulseManager() { }
+
+    /* Static 'instance' method */
+    public static PulseManager getInstance( ) {
+        return pulseManager;
+    }
+
+
 
     /////////////////////PulseSessionListener methods////////////
 
@@ -151,7 +172,8 @@ public class PulseManager implements PulseSessionListener  {
     public void startAdPlayback(PulseVideoAd pulseVideoAd, float timeout) {
         currentPulseVideoAd = pulseVideoAd;
         adPlaybackTimeout = (long) timeout;
-        OmidAdSession.createOmidSession(currentPulseVideoAd, context, videoPlayer, controlBar);
+        OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, videoPlayer, controlBar);
+//        OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, videoPlayer, null);
         playAdContent(timeout, pulseVideoAd);
         //Try to show the companion ads attached to this ad.
         showCompanionAds(pulseVideoAd);
@@ -372,6 +394,7 @@ public class PulseManager implements PulseSessionListener  {
      */
     public void playAdContent(float timeout, final PulseVideoAd pulseVideoAd) {
         controlBar.setVisibility(View.VISIBLE);
+        currentPulseVideoAd.playerStateChanged(PlayerState.FULLSCREEN);
         //Configure a handler to monitor playback timeout.
         playbackHandler.postDelayed(playbackRunnable, (long) (timeout * 1000));
         MediaFile mediaFile = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles());

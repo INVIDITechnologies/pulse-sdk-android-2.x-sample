@@ -15,6 +15,7 @@ public class CustomVideoView extends VideoView {
     private PlayPauseListener mListener;
     private Uri uri;
     private boolean contentPaused = false;
+    private boolean isFullScreen = false;
 
 
     public CustomVideoView(Context context) {
@@ -64,6 +65,7 @@ public class CustomVideoView extends VideoView {
     {
         return uri;
     }
+
 
     //An interface created to report when the content is played, paused, and resumed.
     public interface PlayPauseListener {

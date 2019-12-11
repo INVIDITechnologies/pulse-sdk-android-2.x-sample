@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.MediaController;
 
 import com.ooyala.pulse.PulseVideoAd;
 import com.ooyala.pulseplayer.PulseManager.PulseManager;
@@ -25,6 +24,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_video_player);
 
         //Get the selected videoItem from the bundled information.
@@ -36,7 +36,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         skipButton.setVisibility(View.INVISIBLE);
 
-        MediaController controllBar = new MediaController(this);
+        CustomMediaController controllBar = new CustomMediaController(this);
 
         //Create an instance of CustomImageView that is responsible for displaying pause ad.
         CustomImageView imageView = (CustomImageView) findViewById(R.id.pauseAdLayout);
@@ -49,6 +49,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         pulseManager = new PulseManager(videoItem, player, controllBar, skipButton, imageView, companionBannerViewTop, companionBannerViewBottom, this, this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
+
         pulseManager.setOnClickThroughCallback(new PulseManager.ClickThroughCallback() {
             @Override
             public void onClicked(PulseVideoAd ad) {
@@ -116,7 +117,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         VideoItem selectedVideoItem = new VideoItem();
 
         selectedVideoItem.setTags(getIntent().getExtras().getStringArray("contentMetadataTags"));
-        selectedVideoItem.setMidrollPossition(getIntent().getExtras().getIntArray("midrollPositions"));
+        selectedVideoItem.setMidrollPosition(getIntent().getExtras().getIntArray("midrollPositions"));
         selectedVideoItem.setContentTitle(getIntent().getExtras().getString("contentTitle"));
         selectedVideoItem.setContentId(getIntent().getExtras().getString("contentId"));
         selectedVideoItem.setContentUrl(getIntent().getExtras().getString("contentUrl"));

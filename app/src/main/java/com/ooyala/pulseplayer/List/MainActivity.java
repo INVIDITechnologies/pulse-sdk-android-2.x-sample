@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             Log.i("Pulse Demo Player", "Error occurred: "+ e.getClass());
         }
         videoItem.setTags(tags);
-        videoItem.setMidrollPossition(midrollPosition);
+        videoItem.setMidrollPosition(midrollPosition);
         if (videoJson.has("category")) {
             videoItem.setCategory(getString(videoJson, "category"));
         } else {
