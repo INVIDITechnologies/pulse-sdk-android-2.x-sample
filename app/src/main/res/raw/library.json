@@ -11,7 +11,7 @@
   "content-id":        "demo-preroll",
   "midroll-positions": [],
   "content-duration":  52,
-  "content-url":       "http://pulse-demo.vp.videoplaza.tv/resources/media/more_like_trees_640x360.mp4"
+  "content-url":       "http://pulse-demo.vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
   "tags":              ["standard-midrolls"],
   "midroll-positions": [10, 20],
@@ -47,7 +47,7 @@
   "content-duration":  52,
   "content-url":       "http://pulse-demo.vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
-  "tags":             ["standard-linears"],
+  "tags":             ["om_vast4.1"],
   "category":         "skip-always",
   "midroll-positions": [10, 20],
   "content-title":    "Pre-/mid-/postroll skippable",

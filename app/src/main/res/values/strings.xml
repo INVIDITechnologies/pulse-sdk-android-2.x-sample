@@ -7,4 +7,5 @@
     <string name="skip_ad">Skip Ad</string>
     <string name="Splash_Resume_Message">Ad: Press play to resume content</string>
     <string name="FS">FS</string>
+    <string name="title_activity_exo_video_player" />
 </resources>

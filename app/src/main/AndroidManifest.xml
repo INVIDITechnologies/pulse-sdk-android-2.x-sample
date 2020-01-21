@@ -10,11 +10,13 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".List.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,10 +25,9 @@
         </activity>
         <activity
             android:name=".videoPlayer.VideoPlayerActivity"
-            android:label="@string/title_activity_video_player"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".videoPlayer.FullScreenVideoPlayerActivity"
-            android:label="VideoPlayerFullScreenActivity"></activity>
+            android:label="@string/title_activity_exo_video_player"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|screenSize"></activity>
     </application>
 
 </manifest>
