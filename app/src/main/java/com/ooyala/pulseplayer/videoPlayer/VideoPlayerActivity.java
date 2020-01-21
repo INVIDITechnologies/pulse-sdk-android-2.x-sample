@@ -48,12 +48,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_video_player);
 
-
         //Get the selected videoItem from the bundled information.
         final VideoItem videoItem = getSelectedVideoItem();
         Button skipButton = (Button) findViewById(R.id.skipBtn);
         skipButton.setVisibility(View.INVISIBLE);
-
         playerView = findViewById(R.id.exoplayer);
         playerView.showController();
         playerView.setControllerShowTimeoutMs(-1);

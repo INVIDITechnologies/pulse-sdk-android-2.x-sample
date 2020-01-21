@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -60,6 +61,8 @@ public class PulseManager implements PulseSessionListener {
     private CustomCompanionBannerView companionBannerViewTop, companionBannerViewBottom;
     private Activity activity;
     private Context context;
+    private SeekBar playerVolumeController;
+    private Float playerVolume;
     private VideoItem videoItem = new VideoItem();
     private List<String> availableCompanionBannerZones = new ArrayList();
     private boolean duringVideoContent = false, duringAd = false, duringPause = false, companionClicked = false, playAd = false, playVideoContent = false;
@@ -106,10 +109,11 @@ public class PulseManager implements PulseSessionListener {
         if (companionBannerViewBottom.getContentDescription() != null) {
             availableCompanionBannerZones.add(companionBannerViewBottom.getContentDescription().toString());
         }
-
         this.activity = activity;
         this.context = context;
 
+        playerVolumeController = (SeekBar) activity.findViewById(R.id.volume_controller);
+        initPlayerVolumeControl();
         // Create and start a pulse session
         pulseSession = Pulse.createSession(getContentMetadata(), getRequestSettings());
         pulseSession.startSession(this);
@@ -778,6 +782,29 @@ public class PulseManager implements PulseSessionListener {
             }
             duringPause = false;
         }
+    }
+
+    protected void initPlayerVolumeControl() {
+
+        playerVolumeController.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                playerVolume = Float.valueOf(progress)/100;
+                exoPlayerInstance.setVolume(playerVolume);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (playAd) {
+                    currentPulseVideoAd.volumeChanged(playerVolume);
+                }
+            }
+        });
     }
 
     class ExoPlayerEventListener implements Player.EventListener {
