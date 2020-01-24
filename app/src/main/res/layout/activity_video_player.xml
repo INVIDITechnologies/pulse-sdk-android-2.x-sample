@@ -30,16 +30,17 @@
                 android:id="@+id/exoplayer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center" />
+                android:gravity="center"
+                app:resize_mode="fill"/>
         </FrameLayout>
 
         <Button android:id="@+id/skipBtn"
             android:text="@string/skip_ad_remaining_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="150dp"
             android:layout_marginRight="10dp"
             android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:color="#66FF0000"
             android:alpha="0.5"/>
 

@@ -22,7 +22,7 @@ This is absolutely **not** intended to be used in production or to outline best 
 
 ## Project structure
 
-The Pulse SDK is initialised in the [PulseManager](app/src/main/java/com/ooyala/pulseplayer/PulseManager/PulseManager.java).
+The Pulse SDK is initialized in the [PulseManager](app/src/main/java/com/ooyala/pulseplayer/PulseManager/PulseManager.java).
 
 A [List Activity](app/src/main/java/com/ooyala/pulseplayer/List/MainActivity.java) shows a list of available videos, along with some [metadata](app/src/main/java/com/ooyala/pulseplayer/utils/VideoItem.java). When a video is selected it is opened in a [VideoPlayerActivity](app/src/main/java/com/ooyala/pulseplayer/videoPlayer/VideoPlayerActivity.java).
 

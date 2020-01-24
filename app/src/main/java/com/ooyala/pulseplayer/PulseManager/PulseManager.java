@@ -153,7 +153,11 @@ public class PulseManager implements PulseSessionListener {
     @Override
     public void startAdPlayback(PulseVideoAd pulseVideoAd, float timeout) {
         currentPulseVideoAd = pulseVideoAd;
-        OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, friendlyObs);
+        if("OM AdVerification with skipAd as Friendly Obstruction".equals(videoItem.getContentTitle())){
+            OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, friendlyObs);
+        } else {
+            OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView);
+        }
         playAdContent(timeout, pulseVideoAd);
         //Try to show the companion ads attached to this ad.
         showCompanionAds(pulseVideoAd);

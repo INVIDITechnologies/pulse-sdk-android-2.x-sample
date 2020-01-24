@@ -58,9 +58,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         adView = findViewById(R.id.exo_content_frame);
 
-
         friendlyObs.add(findViewById(R.id.skipBtn));
-        friendlyObs.add(findViewById(R.id.exo_controller));
 
         initFullscreenDialog();
         initFullscreenButton();
