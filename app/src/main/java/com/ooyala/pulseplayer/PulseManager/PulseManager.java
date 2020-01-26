@@ -153,10 +153,12 @@ public class PulseManager implements PulseSessionListener {
     @Override
     public void startAdPlayback(PulseVideoAd pulseVideoAd, float timeout) {
         currentPulseVideoAd = pulseVideoAd;
-        if("OM AdVerification with skipAd as Friendly Obstruction".equals(videoItem.getContentTitle())){
-            OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, friendlyObs);
-        } else {
-            OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView);
+        if ("omsdk".equals(videoItem.getContentId())) {
+            if ("OM AdVerification with skipAd as Friendly Obstruction".equals(videoItem.getContentTitle())) {
+                OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, friendlyObs);
+            } else {
+                OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView);
+            }
         }
         playAdContent(timeout, pulseVideoAd);
         //Try to show the companion ads attached to this ad.
@@ -671,6 +673,14 @@ public class PulseManager implements PulseSessionListener {
         }
     }
 
+    public void removeFriendlyObstructions() {
+        if ("omsdk".equals(videoItem.getContentId())) {
+            // This will remove all registered friendly obstructions.
+            // In case you want to remove specific list of registered friendlyObstructions use OmidAdSession.removeFriendlyObstructions(friendlyObs);
+            OmidAdSession.removeAllFriendlyObstructions();
+        }
+    }
+
     public void sendEnterFullScreenEvent() {
         if (playAd) {
             currentPulseVideoAd.playerStateChanged(PlayerState.FULLSCREEN);
@@ -713,6 +723,12 @@ public class PulseManager implements PulseSessionListener {
             if (!adStarted) {
                 adStarted = true;
                 currentPulseVideoAd.adStarted();
+                //In case you want to add friendlyObstruction later on after the ad has started.
+                if ("omsdk".equals(videoItem.getContentId())) {
+                    if ("OM AdVerification skipAd as Friendly Obstruction after ad started".equals(videoItem.getContentTitle())) {
+                        OmidAdSession.addFriendlyObstructions(friendlyObs);
+                    }
+                }
             }
             //If this ad is skippable, update the skip button.
             if (currentPulseVideoAd.isSkippable()) {

@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
 
+import com.ooyala.pulse.OmidAdSession;
 import com.ooyala.pulse.PulseVideoAd;
 import com.ooyala.pulseplayer.PulseManager.PulseManager;
 import com.ooyala.pulseplayer.R;
@@ -38,6 +39,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private ImageView mFullScreenIcon;
     private FrameLayout mFullScreenButton;
     private View adView;
+    private Button skipButton;
     List<View> friendlyObs = new ArrayList<>();
     private boolean mExoPlayerFullscreen = false;
     private static final String TAG = VideoPlayerActivity.class.getName();
@@ -50,7 +52,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         //Get the selected videoItem from the bundled information.
         final VideoItem videoItem = getSelectedVideoItem();
-        Button skipButton = (Button) findViewById(R.id.skipBtn);
+        skipButton = (Button) findViewById(R.id.skipBtn);
         skipButton.setVisibility(View.INVISIBLE);
         playerView = findViewById(R.id.exoplayer);
         playerView.showController();
@@ -192,11 +194,16 @@ public class VideoPlayerActivity extends AppCompatActivity {
         mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.exo_controls_fullscreen_exit));
         mExoPlayerFullscreen = true;
         mFullScreenDialog.show();
+        // In order to test removefriendlyObstructions, call below method to unregistered friendly obstructions after entering into fullScreen.
+        // And if you want to register them again after exiting fullScreen, you will need to add them again as friendlyObstruction using OmidAdSession.addFriendlyObstructions(friendlyObs);
+        // pulseManager.removeFriendlyObstructions();
+
+        // In order to test update ad view, call below method. This will change the PercentageInView as 0 and reason as "NotFound", because this View will not be found.
+        OmidAdSession.registerAdView(findViewById(R.id.playerLayout));
         pulseManager.sendEnterFullScreenEvent();
     }
 
     private void closeFullscreenDialog() {
-
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         ((ViewGroup) playerView.getParent()).removeView(playerView);
         ((FrameLayout) findViewById(R.id.main_media_frame)).addView(playerView);
@@ -206,9 +213,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         pulseManager.sendExitFullScreenEvent();
     }
 
-
     protected void initFullscreenButton() {
-
         PlayerControlView controlView = playerView.findViewById(R.id.exo_controller);
         mFullScreenIcon = controlView.findViewById(R.id.exo_fullscreen_icon);
         mFullScreenButton = controlView.findViewById(R.id.exo_fullscreen_button);

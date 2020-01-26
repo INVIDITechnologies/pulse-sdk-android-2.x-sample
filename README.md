@@ -39,6 +39,10 @@ This account is configured with a set of ad campaigns that help with testing an 
 
 You may use this account in the testing of your application. Refer to the [content library](app/src/main/res/raw/library.json) used in this sample for useful tags and categories.
 
+## Open Measurement 
+
+In order to initialize OMSDK integration, OmidAdSession.createOmidAdSession(PulseVideoAd pulseVideoAd, Context context, View adView) api needs to be called just before Playing Ad Content.
+To verify the integration, test cases are mentioned in [OpenMeasurementTests](OpenMeasurementTests.md)
 
 ## Useful information
 
