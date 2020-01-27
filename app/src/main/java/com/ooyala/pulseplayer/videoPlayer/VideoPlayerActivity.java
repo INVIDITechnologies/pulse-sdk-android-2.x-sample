@@ -116,6 +116,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         super.onStart();
         pulseManager.initializePlayer();
             }*/
+
     @Override
     public void onPause() {
         super.onPause();
@@ -199,7 +200,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         // pulseManager.removeFriendlyObstructions();
 
         // In order to test update ad view, call below method. This will change the PercentageInView as 0 and reason as "NotFound", because this View will not be found.
-        OmidAdSession.registerAdView(findViewById(R.id.playerLayout));
+        // OmidAdSession.registerAdView(findViewById(R.id.playerLayout));
         pulseManager.sendEnterFullScreenEvent();
     }
 

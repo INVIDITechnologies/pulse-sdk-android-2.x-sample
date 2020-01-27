@@ -454,8 +454,8 @@ public class PulseManager implements PulseSessionListener {
                     duringAd = false;
 //                            exoPlayerInstance.setPlayWhenReady(false);
                     //Report ad clicked to Pulse SDK.
+                    currentPulseVideoAd.adPaused();
                     currentPulseVideoAd.adClickThroughTriggered();
-                    playerView.setOnClickListener(null);
                     clickThroughCallback.onClicked(currentPulseVideoAd);
                     Log.i(TAG, "ClickThrough occurred.");
                 }
@@ -538,6 +538,7 @@ public class PulseManager implements PulseSessionListener {
 
     ////////////////////click through related methods///////////
     public void returnFromClickThrough() {
+        playerView.showController();
         if (companionClicked) {
             if (duringAd) {
                 resumeAdPlayback();
