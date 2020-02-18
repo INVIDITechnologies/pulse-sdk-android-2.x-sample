@@ -22,7 +22,7 @@ This is absolutely **not** intended to be used in production or to outline best 
 
 ## Project structure
 
-The Pulse SDK is initialised in the [PulseManager](app/src/main/java/com/ooyala/pulseplayer/PulseManager/PulseManager.java).
+The Pulse SDK is initialized in the [PulseManager](app/src/main/java/com/ooyala/pulseplayer/PulseManager/PulseManager.java).
 
 A [List Activity](app/src/main/java/com/ooyala/pulseplayer/List/MainActivity.java) shows a list of available videos, along with some [metadata](app/src/main/java/com/ooyala/pulseplayer/utils/VideoItem.java). When a video is selected it is opened in a [VideoPlayerActivity](app/src/main/java/com/ooyala/pulseplayer/videoPlayer/VideoPlayerActivity.java).
 
@@ -39,6 +39,10 @@ This account is configured with a set of ad campaigns that help with testing an 
 
 You may use this account in the testing of your application. Refer to the [content library](app/src/main/res/raw/library.json) used in this sample for useful tags and categories.
 
+## Open Measurement 
+
+In order to initialize OMSDK integration, OmidAdSession.createOmidAdSession(PulseVideoAd pulseVideoAd, Context context, View adView) api needs to be called just before Playing Ad Content.
+To verify the integration, test cases are mentioned in [OpenMeasurementTests](OpenMeasurementTests.md)
 
 ## Useful information
 

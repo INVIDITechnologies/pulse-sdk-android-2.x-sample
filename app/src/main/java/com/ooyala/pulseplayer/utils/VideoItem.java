@@ -32,7 +32,7 @@ public class VideoItem {
      *  An array of numbers of positions (in seconds) where midroll ad breaks
      *  may occur.
      */
-    private int[] midrollPossition = null;
+    private int[] midrollPosition = null;
 
     /**
      *  A string category used to target ad campaigns.
@@ -78,11 +78,11 @@ public class VideoItem {
     }
 
     public int[] getMidrollPositions() {
-        return midrollPossition;
+        return midrollPosition;
     }
 
-    public void setMidrollPossition(int[] midrollPossition) {
-        this.midrollPossition = midrollPossition;
+    public void setMidrollPosition(int[] midrollPosition) {
+        this.midrollPosition = midrollPosition;
     }
 
     public String getCategory() {

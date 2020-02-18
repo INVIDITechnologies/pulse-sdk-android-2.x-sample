@@ -1,19 +1,32 @@
 package com.ooyala.pulseplayer.videoPlayer;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
+
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.MediaController;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
+import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.ui.PlayerView;
+
+import com.ooyala.pulse.OmidAdSession;
 import com.ooyala.pulse.PulseVideoAd;
 import com.ooyala.pulseplayer.PulseManager.PulseManager;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.utils.VideoItem;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * An activity for playing ad video and content. This activity employs a PulseManager instance to manage the Pulse session.
@@ -21,21 +34,36 @@ import java.net.URL;
 public class VideoPlayerActivity extends AppCompatActivity {
     static final int OPEN_BROWSER_REQUEST = 1365;
     public static PulseManager pulseManager;
+    private PlayerView playerView;
+    private Dialog mFullScreenDialog;
+    private ImageView mFullScreenIcon;
+    private FrameLayout mFullScreenButton;
+    private View adView;
+    private Button skipButton;
+    List<View> friendlyObs = new ArrayList<>();
+    private boolean mExoPlayerFullscreen = false;
+    private static final String TAG = VideoPlayerActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_video_player);
 
         //Get the selected videoItem from the bundled information.
         final VideoItem videoItem = getSelectedVideoItem();
-
-        //Create an instance of CustomVideoView that is responsible for displaying both ad video and content.
-        CustomVideoView player = (CustomVideoView) findViewById(R.id.player) ;
-        Button skipButton = (Button) findViewById(R.id.skipBtn);
+        skipButton = (Button) findViewById(R.id.skipBtn);
         skipButton.setVisibility(View.INVISIBLE);
+        playerView = findViewById(R.id.exoplayer);
+        playerView.showController();
+        playerView.setControllerShowTimeoutMs(-1);
 
-        MediaController controllBar = new MediaController(this);
+        adView = findViewById(R.id.exo_content_frame);
+
+        friendlyObs.add(findViewById(R.id.skipBtn));
+
+        initFullscreenDialog();
+        initFullscreenButton();
 
         //Create an instance of CustomImageView that is responsible for displaying pause ad.
         CustomImageView imageView = (CustomImageView) findViewById(R.id.pauseAdLayout);
@@ -44,10 +72,12 @@ public class VideoPlayerActivity extends AppCompatActivity {
         CustomCompanionBannerView companionBannerViewTop = (CustomCompanionBannerView) findViewById(R.id.companionTop);
         CustomCompanionBannerView companionBannerViewBottom = (CustomCompanionBannerView) findViewById(R.id.companionBottom);
 
+
         //Instantiate Pulse manager with selected data.
-        pulseManager = new PulseManager(videoItem, player, controllBar, skipButton, imageView, companionBannerViewTop, companionBannerViewBottom, this);
+        pulseManager = new PulseManager(videoItem, playerView, adView, friendlyObs, skipButton, imageView, companionBannerViewTop, companionBannerViewBottom, this, this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
+
         pulseManager.setOnClickThroughCallback(new PulseManager.ClickThroughCallback() {
             @Override
             public void onClicked(PulseVideoAd ad) {
@@ -69,28 +99,43 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 }
             }
 
-          @Override
-          public void onCompanionAdClicked(URL clickThroughUrl) {
-            if (clickThroughUrl != null) {
-              Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(clickThroughUrl.toString()));
-              startActivityForResult(intent, OPEN_BROWSER_REQUEST);
-            } else {
-              pulseManager.returnFromClickThrough();
+            @Override
+            public void onCompanionAdClicked(URL clickThroughUrl) {
+                if (clickThroughUrl != null) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(clickThroughUrl.toString()));
+                    startActivityForResult(intent, OPEN_BROWSER_REQUEST);
+                } else {
+                    pulseManager.returnFromClickThrough();
+                }
             }
-          }
         });
+    }
+
+/*    @Override
+    protected void onStart() {
+        super.onStart();
+        pulseManager.initializePlayer();
+            }*/
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mFullScreenDialog != null)
+            mFullScreenDialog.dismiss();
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
         pulseManager.removeCallback(PulseManager.contentProgressHandler);
+       pulseManager.releasePlayer();
     }
 
     @Override
     public void onStop(){
         super.onStop();
         pulseManager.removeCallback(PulseManager.contentProgressHandler);
+        pulseManager.releasePlayer();
     }
 
     @Override
@@ -104,7 +149,16 @@ public class VideoPlayerActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        pulseManager.setCallBackHandler(PulseManager.contentProgressHandler);
+        initFullscreenDialog();
+        initFullscreenButton();
+        pulseManager.initializePlayer();
+        if (mExoPlayerFullscreen) {
+            ((ViewGroup) playerView.getParent()).removeView(playerView);
+            mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.exo_controls_fullscreen_exit));
+            mFullScreenDialog.show();
+        }
+ //       pulseManager.setCallBackHandler(PulseManager.contentProgressHandler);
     }
 
     /**
@@ -115,12 +169,63 @@ public class VideoPlayerActivity extends AppCompatActivity {
         VideoItem selectedVideoItem = new VideoItem();
 
         selectedVideoItem.setTags(getIntent().getExtras().getStringArray("contentMetadataTags"));
-        selectedVideoItem.setMidrollPossition(getIntent().getExtras().getIntArray("midrollPositions"));
+        selectedVideoItem.setMidrollPosition(getIntent().getExtras().getIntArray("midrollPositions"));
         selectedVideoItem.setContentTitle(getIntent().getExtras().getString("contentTitle"));
         selectedVideoItem.setContentId(getIntent().getExtras().getString("contentId"));
         selectedVideoItem.setContentUrl(getIntent().getExtras().getString("contentUrl"));
         selectedVideoItem.setCategory(getIntent().getExtras().getString("category"));
 
         return selectedVideoItem;
+    }
+
+    protected void initFullscreenDialog() {
+
+        mFullScreenDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
+            public void onBackPressed() {
+                if (mExoPlayerFullscreen)
+                    closeFullscreenDialog();
+                super.onBackPressed();
+            }
+        };
+    }
+    private void openFullscreenDialog() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        ((ViewGroup) playerView.getParent()).removeView(playerView);
+        mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.exo_controls_fullscreen_exit));
+        mExoPlayerFullscreen = true;
+        mFullScreenDialog.show();
+        // In order to test removefriendlyObstructions, call below method to unregistered friendly obstructions after entering into fullScreen.
+        // And if you want to register them again after exiting fullScreen, you will need to add them again as friendlyObstruction using OmidAdSession.addFriendlyObstructions(friendlyObs);
+        // pulseManager.removeFriendlyObstructions();
+
+        // In order to test update ad view, call below method. This will change the PercentageInView as 0 and reason as "NotFound", because this View will not be found.
+        // OmidAdSession.registerAdView(findViewById(R.id.playerLayout));
+        pulseManager.sendEnterFullScreenEvent();
+    }
+
+    private void closeFullscreenDialog() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        ((ViewGroup) playerView.getParent()).removeView(playerView);
+        ((FrameLayout) findViewById(R.id.main_media_frame)).addView(playerView);
+        mExoPlayerFullscreen = false;
+        mFullScreenDialog.dismiss();
+        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.exo_controls_fullscreen_enter));
+        pulseManager.sendExitFullScreenEvent();
+    }
+
+    protected void initFullscreenButton() {
+        PlayerControlView controlView = playerView.findViewById(R.id.exo_controller);
+        mFullScreenIcon = controlView.findViewById(R.id.exo_fullscreen_icon);
+        mFullScreenButton = controlView.findViewById(R.id.exo_fullscreen_button);
+        mFullScreenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mExoPlayerFullscreen)
+                    openFullscreenDialog();
+                else
+                    closeFullscreenDialog();
+            }
+        });
     }
 }
