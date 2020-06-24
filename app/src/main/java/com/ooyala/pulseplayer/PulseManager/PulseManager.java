@@ -806,7 +806,7 @@ public class PulseManager implements PulseSessionListener {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (playAd) {
-                    currentPulseVideoAd.volumeChanged(playerVolume);
+                    currentPulseVideoAd.playerVolumeChanged(playerVolume);
                 }
             }
         });
