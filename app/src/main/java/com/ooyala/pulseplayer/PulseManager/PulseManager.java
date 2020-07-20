@@ -2,13 +2,20 @@ package com.ooyala.pulseplayer.PulseManager;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaMetadataRetriever;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.VideoView;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -41,18 +48,22 @@ import com.ooyala.pulseplayer.utils.VideoItem;
 import com.ooyala.pulseplayer.videoPlayer.CustomCompanionBannerView;
 import com.ooyala.pulseplayer.videoPlayer.CustomImageView;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+
+import static android.media.ThumbnailUtils.createVideoThumbnail;
 
 public class PulseManager implements PulseSessionListener {
 
     private PulseSession pulseSession;
-
     private PlayerView playerView;
     private View adView;
+    private ImageView nextAdThumbnail;
     private SimpleExoPlayer exoPlayerInstance;
     private MediaSource mediaSource;
     private Button skipBtn;
@@ -65,6 +76,7 @@ public class PulseManager implements PulseSessionListener {
     private VideoItem videoItem = new VideoItem();
     private List<String> availableCompanionBannerZones = new ArrayList();
     private boolean duringVideoContent = false, duringAd = false, duringPause = false, companionClicked = false, playAd = false, playVideoContent = false;
+    private boolean nextAdPreloaded = false;
     private boolean contentStarted = false;
     private boolean adPaused = false;
     private boolean adStarted = false;
@@ -87,10 +99,11 @@ public class PulseManager implements PulseSessionListener {
     private static final String TAG = "Pulse Demo Player";
 
 
-    public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, List<View> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
+    public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, ImageView nextAdThumbnail, List<View> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.skipBtn = skipButton;
+        this.nextAdThumbnail = nextAdThumbnail;
         this.pauseImageView = imageView;
         this.companionBannerViewTop = topcompanionBanner;
         this.companionBannerViewBottom = bottomCompanionBanner;
@@ -163,6 +176,52 @@ public class PulseManager implements PulseSessionListener {
         playAdContent(timeout, pulseVideoAd);
         //Try to show the companion ads attached to this ad.
         showCompanionAds(pulseVideoAd);
+    }
+
+    public void preloadNextAd(PulseVideoAd pulseVideoAd) {
+        MediaFile mediaFile = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles());
+        if (mediaFile != null) {
+            String adUri = mediaFile.getURI().toString();
+            mediaSource = buildMediaSource(adUri);
+            nextAdPreloaded = true;
+        } else {
+            Log.i(TAG, "Ad media file was not found.");
+        }
+    }
+
+    public void preloadNextAd() {
+        String adUri = "http://vp.videoplaza.tv/creatives/assets/1c45e07c-6587-4fa7-9e9b-1177ef5d16cf/8f3489b4-3f8c-4739-bf1c-4ccc5c385a48.mp4";
+        Bitmap bitmap = null;
+        try {
+            bitmap = retriveVideoFrameFromVideo(adUri);
+            if (bitmap != null) {
+                nextAdThumbnail.setImageBitmap(bitmap);
+                nextAdThumbnail.setVisibility(View.VISIBLE);
+                nextAdPreloaded = true;
+            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
+
+    public static Bitmap retriveVideoFrameFromVideo(String videoPath) throws Throwable {
+        Bitmap bitmap = null;
+        MediaMetadataRetriever mediaMetadataRetriever = null;
+        try {
+            mediaMetadataRetriever = new MediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(videoPath, new HashMap<String, String>());
+            //   mediaMetadataRetriever.setDataSource(videoPath);
+            bitmap = mediaMetadataRetriever.getFrameAtTime();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Throwable("Exception in retriveVideoFrameFromVideo(String videoPath)" + e.getMessage());
+
+        } finally {
+            if (mediaMetadataRetriever != null) {
+                mediaMetadataRetriever.release();
+            }
+        }
+        return bitmap;
     }
 
     /**
@@ -392,6 +451,7 @@ public class PulseManager implements PulseSessionListener {
         newRequestSettings.setStartAdTimeout(5);
         newRequestSettings.setThirdPartyTimeout(2);
         newRequestSettings.setTotalPassbackTimeout(3);
+        newRequestSettings.setTimeToPreloadNextAd(-2);
         return newRequestSettings;
     }
 
@@ -519,20 +579,25 @@ public class PulseManager implements PulseSessionListener {
     private void playAdContent(float timeout, final PulseVideoAd pulseVideoAd) {
         //Configure a handler to monitor playback timeout.
         playbackHandler.postDelayed(playbackRunnable, (long) (timeout * 1000));
-        MediaFile mediaFile = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles());
-        if (mediaFile != null) {
-            String adUri = mediaFile.getURI().toString();
+        if (nextAdPreloaded == true) {
             playAd = true;
-            mediaSource = buildMediaSource(adUri);
             initializePlayer();
         } else {
-            playbackHandler.removeCallbacks(playbackRunnable);
-            duringAd = false;
-            Log.i(TAG, "Ad media file was not found.");
-            skipBtn.setVisibility(View.INVISIBLE);
-            currentPulseVideoAd.adFailed(PulseAdError.REQUEST_FAILED);
-            adStarted = false;
-            adPaused = false;
+            MediaFile mediaFile = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles());
+            if (mediaFile != null) {
+                String adUri = mediaFile.getURI().toString();
+                playAd = true;
+                mediaSource = buildMediaSource(adUri);
+                initializePlayer();
+            } else {
+                playbackHandler.removeCallbacks(playbackRunnable);
+                duringAd = false;
+                Log.i(TAG, "Ad media file was not found.");
+                skipBtn.setVisibility(View.INVISIBLE);
+                currentPulseVideoAd.adFailed(PulseAdError.REQUEST_FAILED);
+                adStarted = false;
+                adPaused = false;
+            }
         }
     }
 
@@ -614,6 +679,9 @@ public class PulseManager implements PulseSessionListener {
                         currentPulseVideoAd.adPositionChanged(currentAdProgress / 1000);
                     }
                     updateSkipButton((int) (currentAdProgress / 1000));
+                    if (currentAdProgress >= 6000 && !nextAdPreloaded) {
+                         preloadNextAd();
+                    }
                 }
             }
         }
@@ -703,6 +771,7 @@ public class PulseManager implements PulseSessionListener {
         updatedContentMetadata.setContentProviderInformation("pcode1", "embed1");
         RequestSettings updatedRequestSettings = getRequestSettings();
         updatedRequestSettings.setLinearPlaybackPositions(Collections.singletonList(20f));
+        updatedRequestSettings.setTimeToPreloadNextAd(3);
         updatedRequestSettings.setInsertionPointFilter(Collections.singletonList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
         //Make a session extension request and instantiate a PulseSessionExtensionListener.
         //The onComplete callback would be called when the session is successfully extended.
@@ -868,7 +937,6 @@ public class PulseManager implements PulseSessionListener {
                         removeCallback(contentProgressHandler);
                         currentAdProgress = 0;
                         currentPulseVideoAd.adFinished();
-
                     } else if (playVideoContent) {
                         //Inform Pulse SDK about content completion.
                         Log.i(TAG, "Content playback completed.");

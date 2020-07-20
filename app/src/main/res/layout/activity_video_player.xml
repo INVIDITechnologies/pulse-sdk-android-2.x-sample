@@ -8,7 +8,7 @@
 
     <com.ooyala.pulseplayer.videoPlayer.CustomCompanionBannerView
         android:id="@+id/companionTop"
-        android:contentDescription="companion-top"
+        android:contentDescription="@string/companion_top"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"/>
@@ -42,7 +42,20 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:color="#66FF0000"
-            android:alpha="0.5"/>
+            android:alpha="0.5"
+            android:layout_marginEnd="10dp" />
+
+        <ImageView
+            android:id="@+id/nextAdThumbnail"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="100dp"
+            android:contentDescription="@string/nextad"
+            android:layout_marginEnd="10dp"
+            android:layout_alignParentEnd="true" />
 
         <com.ooyala.pulseplayer.videoPlayer.CustomImageView
             android:id="@+id/pauseAdLayout"
@@ -58,7 +71,7 @@
 
     <com.ooyala.pulseplayer.videoPlayer.CustomCompanionBannerView
         android:id="@+id/companionBottom"
-        android:contentDescription="companion-bottom"
+        android:contentDescription="@string/companion_bottom"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"/>

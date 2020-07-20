@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.VideoView;
 
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
@@ -40,6 +41,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private FrameLayout mFullScreenButton;
     private View adView;
     private Button skipButton;
+    private ImageView nextAdThumbnail;
     List<View> friendlyObs = new ArrayList<>();
     private boolean mExoPlayerFullscreen = false;
     private static final String TAG = VideoPlayerActivity.class.getName();
@@ -53,10 +55,12 @@ public class VideoPlayerActivity extends AppCompatActivity {
         //Get the selected videoItem from the bundled information.
         final VideoItem videoItem = getSelectedVideoItem();
         skipButton = (Button) findViewById(R.id.skipBtn);
+        nextAdThumbnail = (ImageView) findViewById(R.id.nextAdThumbnail);
         skipButton.setVisibility(View.INVISIBLE);
         playerView = findViewById(R.id.exoplayer);
         playerView.showController();
         playerView.setControllerShowTimeoutMs(-1);
+
 
         adView = findViewById(R.id.exo_content_frame);
 
@@ -74,7 +78,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
 
         //Instantiate Pulse manager with selected data.
-        pulseManager = new PulseManager(videoItem, playerView, adView, friendlyObs, skipButton, imageView, companionBannerViewTop, companionBannerViewBottom, this, this);
+        pulseManager = new PulseManager(videoItem, playerView, adView, nextAdThumbnail, friendlyObs, skipButton, imageView, companionBannerViewTop, companionBannerViewBottom, this, this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
 
