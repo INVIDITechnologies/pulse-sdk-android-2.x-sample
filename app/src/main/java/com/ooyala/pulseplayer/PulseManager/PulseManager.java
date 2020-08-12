@@ -178,29 +178,25 @@ public class PulseManager implements PulseSessionListener {
         showCompanionAds(pulseVideoAd);
     }
 
-    public void preloadNextAd(PulseVideoAd pulseVideoAd) {
-        MediaFile mediaFile = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles());
+    @Override
+    public void preloadNextAd(PulseVideoAd ad) {
+        MediaFile mediaFile = selectAppropriateMediaFile(ad.getMediaFiles());
         if (mediaFile != null) {
             String adUri = mediaFile.getURI().toString();
+            Bitmap bitmap = null;
+            try {
+                bitmap = retriveVideoFrameFromVideo(adUri);
+                if (bitmap != null) {
+                    nextAdThumbnail.setImageBitmap(bitmap);
+                    nextAdThumbnail.setVisibility(View.VISIBLE);
+                }
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
             mediaSource = buildMediaSource(adUri);
             nextAdPreloaded = true;
         } else {
             Log.i(TAG, "Ad media file was not found.");
-        }
-    }
-
-    public void preloadNextAd() {
-        String adUri = "http://vp.videoplaza.tv/creatives/assets/1c45e07c-6587-4fa7-9e9b-1177ef5d16cf/8f3489b4-3f8c-4739-bf1c-4ccc5c385a48.mp4";
-        Bitmap bitmap = null;
-        try {
-            bitmap = retriveVideoFrameFromVideo(adUri);
-            if (bitmap != null) {
-                nextAdThumbnail.setImageBitmap(bitmap);
-                nextAdThumbnail.setVisibility(View.VISIBLE);
-                nextAdPreloaded = true;
-            }
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
         }
     }
 
@@ -448,10 +444,9 @@ public class PulseManager implements PulseSessionListener {
         newRequestSettings.setApplicationVersion(BuildConfig.VERSION_NAME);
         newRequestSettings.setApplicationID(BuildConfig.APPLICATION_ID);
         newRequestSettings.setApplicationBundle("applicationBundle");
-        newRequestSettings.setStartAdTimeout(5);
-        newRequestSettings.setThirdPartyTimeout(2);
-        newRequestSettings.setTotalPassbackTimeout(3);
-        newRequestSettings.setTimeToPreloadNextAd(-2);
+        newRequestSettings.setStartAdTimeout(500000000);
+        newRequestSettings.setThirdPartyTimeout(200000000);
+        newRequestSettings.setTotalPassbackTimeout(300000000);
         return newRequestSettings;
     }
 
@@ -679,9 +674,6 @@ public class PulseManager implements PulseSessionListener {
                         currentPulseVideoAd.adPositionChanged(currentAdProgress / 1000);
                     }
                     updateSkipButton((int) (currentAdProgress / 1000));
-                    if (currentAdProgress >= 6000 && !nextAdPreloaded) {
-                         preloadNextAd();
-                    }
                 }
             }
         }
@@ -737,6 +729,9 @@ public class PulseManager implements PulseSessionListener {
                     duringAd = false;
                     currentAdProgress = 0L;
                     currentPulseVideoAd.adSkipped();
+                    nextAdPreloaded = false;
+                    nextAdThumbnail.setVisibility(View.INVISIBLE);
+                    nextAdThumbnail.setImageBitmap(null);
                 });
             }
         }
@@ -771,7 +766,6 @@ public class PulseManager implements PulseSessionListener {
         updatedContentMetadata.setContentProviderInformation("pcode1", "embed1");
         RequestSettings updatedRequestSettings = getRequestSettings();
         updatedRequestSettings.setLinearPlaybackPositions(Collections.singletonList(20f));
-        updatedRequestSettings.setTimeToPreloadNextAd(3);
         updatedRequestSettings.setInsertionPointFilter(Collections.singletonList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
         //Make a session extension request and instantiate a PulseSessionExtensionListener.
         //The onComplete callback would be called when the session is successfully extended.
@@ -937,6 +931,10 @@ public class PulseManager implements PulseSessionListener {
                         removeCallback(contentProgressHandler);
                         currentAdProgress = 0;
                         currentPulseVideoAd.adFinished();
+                        //remove next ad thumbnail when current ad is finished.
+                        nextAdPreloaded = false;
+                        nextAdThumbnail.setVisibility(View.INVISIBLE);
+                        nextAdThumbnail.setImageBitmap(null);
                     } else if (playVideoContent) {
                         //Inform Pulse SDK about content completion.
                         Log.i(TAG, "Content playback completed.");
