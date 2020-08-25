@@ -3,19 +3,15 @@ package com.ooyala.pulseplayer.PulseManager;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.VideoView;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -47,16 +43,12 @@ import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.utils.VideoItem;
 import com.ooyala.pulseplayer.videoPlayer.CustomCompanionBannerView;
 import com.ooyala.pulseplayer.videoPlayer.CustomImageView;
-
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
-import static android.media.ThumbnailUtils.createVideoThumbnail;
 
 public class PulseManager implements PulseSessionListener {
 
