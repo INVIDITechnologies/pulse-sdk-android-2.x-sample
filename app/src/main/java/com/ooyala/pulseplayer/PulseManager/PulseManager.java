@@ -58,6 +58,7 @@ public class PulseManager implements PulseSessionListener {
     private ImageView nextAdThumbnail;
     private SimpleExoPlayer exoPlayerInstance;
     private MediaSource mediaSource;
+    private MediaSource nextAdMediaSource;
     private Button skipBtn;
     private CustomImageView pauseImageView;
     private CustomCompanionBannerView companionBannerViewTop, companionBannerViewBottom;
@@ -185,7 +186,7 @@ public class PulseManager implements PulseSessionListener {
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
-            mediaSource = buildMediaSource(adUri);
+            nextAdMediaSource = buildMediaSource(adUri);
             nextAdPreloaded = true;
         } else {
             Log.i(TAG, "Ad media file was not found.");
@@ -568,6 +569,7 @@ public class PulseManager implements PulseSessionListener {
         playbackHandler.postDelayed(playbackRunnable, (long) (timeout * 1000));
         if (nextAdPreloaded == true) {
             playAd = true;
+            mediaSource = nextAdMediaSource;
             initializePlayer();
         } else {
             MediaFile mediaFile = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles());
