@@ -567,9 +567,10 @@ public class PulseManager implements PulseSessionListener {
     private void playAdContent(float timeout, final PulseVideoAd pulseVideoAd) {
         //Configure a handler to monitor playback timeout.
         playbackHandler.postDelayed(playbackRunnable, (long) (timeout * 1000));
-        if (nextAdPreloaded == true) {
+        if (nextAdPreloaded == true && nextAdMediaSource != null) {
             playAd = true;
             mediaSource = nextAdMediaSource;
+            nextAdMediaSource = null;
             initializePlayer();
         } else {
             MediaFile mediaFile = selectAppropriateMediaFile(pulseVideoAd.getMediaFiles());
