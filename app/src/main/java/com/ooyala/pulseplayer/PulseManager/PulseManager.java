@@ -26,6 +26,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.ooyala.pulse.ContentMetadata;
 import com.ooyala.pulse.Error;
+import com.ooyala.pulse.FriendlyObstruction;
 import com.ooyala.pulse.MediaFile;
 import com.ooyala.pulse.OmidAdSession;
 import com.ooyala.pulse.PlayerState;
@@ -84,7 +85,7 @@ public class PulseManager implements PulseSessionListener {
     private long currentAdProgress = 0L;
     private boolean skipEnabled = false;
     private ClickThroughCallback clickThroughCallback;
-    private List<View> friendlyObs;
+    private List<FriendlyObstruction> friendlyObs;
 
     private int currentWindow = 0;
     private boolean playWhenReady = true;
@@ -92,7 +93,7 @@ public class PulseManager implements PulseSessionListener {
     private static final String TAG = "Pulse Demo Player";
 
 
-    public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, ImageView nextAdThumbnail, List<View> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
+    public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, ImageView nextAdThumbnail, List<FriendlyObstruction> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.skipBtn = skipButton;
@@ -161,9 +162,9 @@ public class PulseManager implements PulseSessionListener {
         currentPulseVideoAd = pulseVideoAd;
         if ("omsdk".equals(videoItem.getContentId())) {
             if ("OM AdVerification with skipAd as Friendly Obstruction".equals(videoItem.getContentTitle())) {
-                OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, friendlyObs);
+                OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, "invidi.pulseplayer.com", friendlyObs);
             } else {
-                OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView);
+                OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, "invidi.pulseplayer.com");
             }
         }
         playAdContent(timeout, pulseVideoAd);
