@@ -197,9 +197,9 @@ public class VideoPlayerActivity extends AppCompatActivity {
         mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.exo_controls_fullscreen_exit));
         mExoPlayerFullscreen = true;
         mFullScreenDialog.show();
-        // In order to test removefriendlyObstructions, call below method to unregistered friendly obstructions after entering into fullScreen.
+        // In order to test removeAllFriendlyObstructions, call below method to unregistered friendly obstructions after entering into fullScreen.
         // And if you want to register them again after exiting fullScreen, you will need to add them again as friendlyObstruction using OmidAdSession.addFriendlyObstructions(friendlyObs);
-        // pulseManager.removeFriendlyObstructions();
+        // pulseManager.removeAllFriendlyObstructions();
 
         // In order to test update ad view, call below method. This will change the PercentageInView as 0 and reason as "NotFound", because this View will not be found.
         // OmidAdSession.registerAdView(findViewById(R.id.playerLayout));
