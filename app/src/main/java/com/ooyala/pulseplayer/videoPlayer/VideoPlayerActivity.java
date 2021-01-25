@@ -13,12 +13,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.VideoView;
 
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
 
-import com.ooyala.pulse.OmidAdSession;
+import com.ooyala.pulse.FriendlyObstruction;
 import com.ooyala.pulse.PulseVideoAd;
 import com.ooyala.pulseplayer.PulseManager.PulseManager;
 import com.ooyala.pulseplayer.R;
@@ -42,7 +41,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private View adView;
     private Button skipButton;
     private ImageView nextAdThumbnail;
-    List<View> friendlyObs = new ArrayList<>();
+    List<FriendlyObstruction> friendlyObs = new ArrayList<>();
     private boolean mExoPlayerFullscreen = false;
     private static final String TAG = VideoPlayerActivity.class.getName();
 
@@ -61,10 +60,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
         playerView.showController();
         playerView.setControllerShowTimeoutMs(-1);
 
-
         adView = findViewById(R.id.exo_content_frame);
 
-        friendlyObs.add(findViewById(R.id.skipBtn));
+        FriendlyObstruction fob1 = new FriendlyObstruction(findViewById(R.id.skipBtn), FriendlyObstruction.FriendlyObstructionPurpose.VIDEO_CONTROLS, null);
+        friendlyObs.add(fob1);
 
         initFullscreenDialog();
         initFullscreenButton();
@@ -75,7 +74,6 @@ public class VideoPlayerActivity extends AppCompatActivity {
         //Create two instances of CustomCompanionBannerView that are responsible for displaying companion banner ads.
         CustomCompanionBannerView companionBannerViewTop = (CustomCompanionBannerView) findViewById(R.id.companionTop);
         CustomCompanionBannerView companionBannerViewBottom = (CustomCompanionBannerView) findViewById(R.id.companionBottom);
-
 
         //Instantiate Pulse manager with selected data.
         pulseManager = new PulseManager(videoItem, playerView, adView, nextAdThumbnail, friendlyObs, skipButton, imageView, companionBannerViewTop, companionBannerViewBottom, this, this);
@@ -199,9 +197,9 @@ public class VideoPlayerActivity extends AppCompatActivity {
         mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.exo_controls_fullscreen_exit));
         mExoPlayerFullscreen = true;
         mFullScreenDialog.show();
-        // In order to test removefriendlyObstructions, call below method to unregistered friendly obstructions after entering into fullScreen.
+        // In order to test removeAllFriendlyObstructions, call below method to unregistered friendly obstructions after entering into fullScreen.
         // And if you want to register them again after exiting fullScreen, you will need to add them again as friendlyObstruction using OmidAdSession.addFriendlyObstructions(friendlyObs);
-        // pulseManager.removeFriendlyObstructions();
+        // pulseManager.removeAllFriendlyObstructions();
 
         // In order to test update ad view, call below method. This will change the PercentageInView as 0 and reason as "NotFound", because this View will not be found.
         // OmidAdSession.registerAdView(findViewById(R.id.playerLayout));

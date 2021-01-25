@@ -53,7 +53,8 @@
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="100dp"
             android:layout_marginEnd="10dp"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:visibility="gone" />
 
         <com.ooyala.pulseplayer.videoPlayer.CustomImageView
             android:id="@+id/pauseAdLayout"
