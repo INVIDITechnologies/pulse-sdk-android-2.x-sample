@@ -161,7 +161,7 @@ public class PulseManager implements PulseSessionListener {
     public void startAdPlayback(PulseVideoAd pulseVideoAd, float timeout) {
         currentPulseVideoAd = pulseVideoAd;
         if ("omsdk".equals(videoItem.getContentId())) {
-            if ("OM AdVerification with skipAd as Friendly Obstruction".equals(videoItem.getContentTitle()) || "OMSDK Certification - skipAd as FriendlyObstruction".equals(videoItem.getContentTitle())) {
+            if ("OM AdVerification with skipAd as Friendly Obstruction".equals(videoItem.getContentTitle()) || "OMSDK Certification - skipAd as friendly obstruction".equals(videoItem.getContentTitle())) {
                 OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, "invidi.pulseplayer.com", friendlyObs);
             } else {
                 OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, "invidi.pulseplayer.com");
