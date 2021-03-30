@@ -122,6 +122,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
+        pulseManager.onGoingIntoBackground();
         if (mFullScreenDialog != null)
             mFullScreenDialog.dismiss();
     }
@@ -154,6 +155,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         initFullscreenDialog();
         initFullscreenButton();
         pulseManager.initializePlayer();
+        pulseManager.onComingIntoForeground();
         if (mExoPlayerFullscreen) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
             mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));

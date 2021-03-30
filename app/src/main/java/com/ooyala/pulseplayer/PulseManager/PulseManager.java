@@ -846,6 +846,34 @@ public class PulseManager implements PulseSessionListener {
         }
     }
 
+    public void onGoingIntoBackground() {
+        if (playAd) {
+            Log.d(TAG, "Ad Paused");
+            duringAd = false;
+            adPaused = true;
+            //Report ad paused to Pulse SDK.
+            currentPulseVideoAd.adPaused();
+        }
+        if (playVideoContent) {
+            duringVideoContent = false;
+            Log.d(TAG, "Content Paused");
+            duringAd = false;
+            duringPause = true;
+            if (pulseSession != null) {
+                pulseSession.contentPaused();
+            }
+        }
+    }
+
+    public void onComingIntoForeground() {
+        if (playAd) {
+            onAdPlay();
+        } else if (playVideoContent) {
+            onContentPlay();
+            Log.d(TAG, "Content Started");
+        }
+    }
+
     private void initPlayerVolumeControl() {
 
         playerVolumeController.setProgress(100);
