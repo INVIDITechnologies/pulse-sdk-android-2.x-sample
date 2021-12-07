@@ -3,7 +3,6 @@ package com.ooyala.pulseplayer.List;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,6 +23,8 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //     user identifier here.
         // Refer to:
         //     http://support.ooyala.com/developers/ad-documentation/oadtech/ad_serving/dg/integration_sdk_parameter.html
-        Pulse.setPulseHost("http://pulse-demo.videoplaza.tv", null, null);
+        Pulse.setPulseHost("https://pulse-demo.videoplaza.tv", null, null);
 
         if (videoJSonString != null) {
 

@@ -25,6 +25,11 @@ Temporary Items
 
 #####=== Android ===#####
 
+# Eclipse files
+.project
+.classpath
+.settings/
+
 # Built application files
 *.apk
 *.ap_
