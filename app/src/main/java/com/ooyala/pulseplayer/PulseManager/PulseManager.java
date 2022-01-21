@@ -851,8 +851,12 @@ public class PulseManager implements PulseSessionListener {
             Log.d(TAG, "Ad Paused");
             duringAd = false;
             adPaused = true;
-            //Report ad paused to Pulse SDK.
-            currentPulseVideoAd.adPaused();
+            try {
+                //Report ad paused to Pulse SDK.
+                currentPulseVideoAd.adPaused();
+            } catch (Exception throwable) {
+                throwable.printStackTrace();
+            }
         }
         if (playVideoContent) {
             duringVideoContent = false;
@@ -860,7 +864,11 @@ public class PulseManager implements PulseSessionListener {
             duringAd = false;
             duringPause = true;
             if (pulseSession != null) {
-                pulseSession.contentPaused();
+                try {
+                    pulseSession.contentPaused();
+                } catch(Exception throwable) {
+                    throwable.printStackTrace();
+                }
             }
         }
     }
