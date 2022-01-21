@@ -123,7 +123,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        pulseManager.onGoingIntoBackground();
+        // Checks whether ad is playing before calling pause update in Pulse SDK and avoids "Did not expect user ad pause while waiting for ad to start" error.
+        if (playerView.getPlayer().isPlaying()) {
+            pulseManager.onGoingIntoBackground();
+        }
         if (mFullScreenDialog != null)
             mFullScreenDialog.dismiss();
     }

@@ -503,7 +503,7 @@ public class PulseManager implements PulseSessionListener {
                     duringAd = false;
 //                            exoPlayerInstance.setPlayWhenReady(false);
                     //Report ad clicked to Pulse SDK.
-                    currentPulseVideoAd.adPaused();
+//                    currentPulseVideoAd.adPaused();  // commented this since it will be called in onPause method of VideoPlayer Activity also to avoid "ad paused before the ad played" error.
                     currentPulseVideoAd.adClickThroughTriggered();
                     clickThroughCallback.onClicked(currentPulseVideoAd);
                     Log.i(TAG, "ClickThrough occurred.");
@@ -516,10 +516,16 @@ public class PulseManager implements PulseSessionListener {
         if (exoPlayerInstance != null) {
             playWhenReady = exoPlayerInstance.getPlayWhenReady();
             playbackPosition = exoPlayerInstance.getCurrentPosition();
-            if (duringAd) {
-                currentAdProgress = playbackPosition;
-            } else if (duringVideoContent) {
-                currentContentProgress = playbackPosition;
+            // Condition to avoid resume process if playback position is less than 0 ms, which causes " Did not expect user ad resume while waiting for ad to start." error
+            if (playbackPosition > 0) {
+                if (duringAd) {
+                    currentAdProgress = playbackPosition;
+                } else if (duringVideoContent) {
+                    currentContentProgress = playbackPosition;
+                }
+            } else {
+                adPaused = false;
+                duringPause = false;
             }
             currentWindow = exoPlayerInstance.getCurrentWindowIndex();
             exoPlayerInstance.removeListener(playbackStateListener);
@@ -851,12 +857,8 @@ public class PulseManager implements PulseSessionListener {
             Log.d(TAG, "Ad Paused");
             duringAd = false;
             adPaused = true;
-            try {
-                //Report ad paused to Pulse SDK.
-                currentPulseVideoAd.adPaused();
-            } catch (Exception throwable) {
-                throwable.printStackTrace();
-            }
+            //Report ad paused to Pulse SDK.
+            currentPulseVideoAd.adPaused();
         }
         if (playVideoContent) {
             duringVideoContent = false;
@@ -864,11 +866,7 @@ public class PulseManager implements PulseSessionListener {
             duringAd = false;
             duringPause = true;
             if (pulseSession != null) {
-                try {
-                    pulseSession.contentPaused();
-                } catch(Exception throwable) {
-                    throwable.printStackTrace();
-                }
+                pulseSession.contentPaused();
             }
         }
     }
