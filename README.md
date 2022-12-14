@@ -17,7 +17,7 @@ This is absolutely **not** intended to be used in production or to outline best 
 
 4. Update the dependencies in [build.gradle](app/build.gradle) to match the version of your downloaded SDK.
 
-5. Build
+5. Build!
 
 
 ## Project structure
