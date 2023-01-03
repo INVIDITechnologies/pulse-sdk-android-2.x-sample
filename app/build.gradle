@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.ooyala.pulseplayer"
         minSdkVersion 16
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -41,6 +41,6 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.0'
 
     //Change this line to match the downloaded Pulse SDK library.
-    implementation (name:"pulse.2.6.21.10.0", ext:"aar")
+    implementation (name:"pulse.2.6.22.12.0", ext:"aar")
     //implementation project(path: ':library')
 }
