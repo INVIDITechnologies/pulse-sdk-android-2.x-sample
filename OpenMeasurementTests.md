@@ -3,7 +3,8 @@ In order to verify integration of OMSDK with our Android SDK, we have executed m
 Below mentioned test sets can be considered as a reference for clients who wants to use OMSDK integrated with our Android SDK.
 
 ### 1. Test cases mentioned in below document that are applicable for Video Ads can be executed to verify the integration of Open Measurement with Android SDK.
-<https://omsdk-files.s3-us-west-2.amazonaws.com/docs/TestCases.pdf>
+- Test Compliance doc by IAB: <https://omsdk-demo-files.s3-us-west-2.amazonaws.com/docs/TestCases.pdf>
+- Copy of Compliance test executed by IAB on our sample app for providing OMSDK certification: <https://docs.google.com/document/d/1tCUNHZPtGXvHwD3PRUH4zcYJfJ0ha4RQ/edit?usp=sharing&ouid=112114091008396510507&rtpof=true&sd=true>
 
 ### 2. Below are the scenarios executed to verify the "PercentageInView" value for "Impression" and "goemetryChanges" events:
 
