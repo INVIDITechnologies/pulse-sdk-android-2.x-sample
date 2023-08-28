@@ -1,5 +1,6 @@
 package com.ooyala.pulseplayer.List;
 
+import android.app.UiModeManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -9,11 +10,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.ooyala.pulse.LogItem;
 import com.ooyala.pulse.LogListener;
 import com.ooyala.pulse.Pulse;
 import com.ooyala.pulseplayer.R;
-import com.ooyala.pulseplayer.utils.VideoItem;
+import com.ooyala.pulseplayer.model.VideoItem;
 import com.ooyala.pulseplayer.videoPlayer.VideoPlayerActivity;
 
 import org.json.JSONArray;
@@ -23,8 +26,8 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import androidx.appcompat.app.AppCompatActivity;
+import android.app.UiModeManager;
+import android.content.res.Configuration;
 
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -102,6 +105,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             StrictMode.ThreadPolicy policy = new
                     StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
+        }
+
+        UiModeManager uiMode = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+        if(uiMode.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION){
+            //then start TvActivity here
+          Intent tvIntent = new Intent(this, TvMainActivity.class);
+          startActivity(tvIntent);
+          finish();
         }
     }
 
