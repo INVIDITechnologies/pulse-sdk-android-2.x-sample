@@ -3,8 +3,11 @@ package com.ooyala.pulseplayer.videoPlayer;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.app.UiModeManager;
+import android.content.res.Configuration;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -45,6 +48,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     List<FriendlyObstruction> friendlyObs = new ArrayList<>();
     private boolean mExoPlayerFullscreen = false;
     private static final String TAG = VideoPlayerActivity.class.getName();
+    private   UiModeManager uiMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +64,16 @@ public class VideoPlayerActivity extends AppCompatActivity {
         playerView = findViewById(R.id.exoplayer);
         playerView.showController();
         playerView.setControllerShowTimeoutMs(-1);
-
+        uiMode = (UiModeManager) getSystemService(UI_MODE_SERVICE);
         adView = findViewById(R.id.exo_content_frame);
+
+        if(uiMode.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            skipButton.setFocusableInTouchMode(true);
+            skipButton.setFocusable(true);
+            skipButton.setFocusedByDefault(true);
+            skipButton.requestFocus();
+        } else {
+        }
 
         FriendlyObstruction fob1 = new FriendlyObstruction(findViewById(R.id.skipBtn), FriendlyObstruction.FriendlyObstructionPurpose.VIDEO_CONTROLS, null);
         friendlyObs.add(fob1);
