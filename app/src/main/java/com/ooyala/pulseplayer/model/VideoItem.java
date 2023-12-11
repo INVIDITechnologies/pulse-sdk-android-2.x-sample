@@ -1,4 +1,4 @@
-package com.ooyala.pulseplayer.utils;
+package com.ooyala.pulseplayer.model;
 
 /**
  *  A model object for video content.

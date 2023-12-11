@@ -3,8 +3,11 @@ package com.ooyala.pulseplayer.videoPlayer;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.app.UiModeManager;
+import android.content.res.Configuration;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -22,7 +25,7 @@ import com.ooyala.pulse.FriendlyObstruction;
 import com.ooyala.pulse.PulseVideoAd;
 import com.ooyala.pulseplayer.PulseManager.PulseManager;
 import com.ooyala.pulseplayer.R;
-import com.ooyala.pulseplayer.utils.VideoItem;
+import com.ooyala.pulseplayer.model.VideoItem;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -45,6 +48,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     List<FriendlyObstruction> friendlyObs = new ArrayList<>();
     private boolean mExoPlayerFullscreen = false;
     private static final String TAG = VideoPlayerActivity.class.getName();
+    private   UiModeManager uiMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +64,16 @@ public class VideoPlayerActivity extends AppCompatActivity {
         playerView = findViewById(R.id.exoplayer);
         playerView.showController();
         playerView.setControllerShowTimeoutMs(-1);
-
+        uiMode = (UiModeManager) getSystemService(UI_MODE_SERVICE);
         adView = findViewById(R.id.exo_content_frame);
+
+        if(uiMode.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            skipButton.setFocusableInTouchMode(true);
+            skipButton.setFocusable(true);
+            skipButton.setFocusedByDefault(true);
+            skipButton.requestFocus();
+        } else {
+        }
 
         FriendlyObstruction fob1 = new FriendlyObstruction(findViewById(R.id.skipBtn), FriendlyObstruction.FriendlyObstructionPurpose.VIDEO_CONTROLS, null);
         friendlyObs.add(fob1);
@@ -163,7 +175,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         if (mExoPlayerFullscreen) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
             mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.exo_controls_fullscreen_exit));
+            mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, com.google.android.exoplayer2.ui.R.drawable.exo_controls_fullscreen_exit));
             mFullScreenDialog.show();
         }
  //       pulseManager.setCallBackHandler(PulseManager.contentProgressHandler);
@@ -200,7 +212,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         ((ViewGroup) playerView.getParent()).removeView(playerView);
         mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.exo_controls_fullscreen_exit));
+        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, com.google.android.exoplayer2.ui.R.drawable.exo_controls_fullscreen_exit));
         mExoPlayerFullscreen = true;
         mFullScreenDialog.show();
         // In order to test removeAllFriendlyObstructions, call below method to unregistered friendly obstructions after entering into fullScreen.
@@ -218,7 +230,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         ((FrameLayout) findViewById(R.id.main_media_frame)).addView(playerView);
         mExoPlayerFullscreen = false;
         mFullScreenDialog.dismiss();
-        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.exo_controls_fullscreen_enter));
+        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, com.google.android.exoplayer2.ui.R.drawable.exo_controls_fullscreen_exit));
         pulseManager.sendExitFullScreenEvent();
     }
 

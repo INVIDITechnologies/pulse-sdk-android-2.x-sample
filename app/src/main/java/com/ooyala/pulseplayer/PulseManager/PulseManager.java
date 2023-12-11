@@ -41,7 +41,7 @@ import com.ooyala.pulse.PulseVideoAd;
 import com.ooyala.pulse.RequestSettings;
 import com.ooyala.pulseplayer.BuildConfig;
 import com.ooyala.pulseplayer.R;
-import com.ooyala.pulseplayer.utils.VideoItem;
+import com.ooyala.pulseplayer.model.VideoItem;
 import com.ooyala.pulseplayer.videoPlayer.CustomCompanionBannerView;
 import com.ooyala.pulseplayer.videoPlayer.CustomImageView;
 import java.net.URL;

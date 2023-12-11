@@ -8,4 +8,9 @@
     <string name="Splash_Resume_Message">Ad: Press play to resume content</string>
     <string name="title_activity_exo_video_player" />
     <string name="artwork">artwork</string>
+    <string name="browse_title">INVIDI</string>
+    <string name="error_fragment">Error Fragment</string>
+    <!-- Error messages -->
+    <string name="error_fragment_message">An error occurred</string>
+    <string name="dismiss_error">Dismiss</string>
 </resources>

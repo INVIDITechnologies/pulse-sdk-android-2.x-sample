@@ -34,15 +34,6 @@
                 app:resize_mode="fill"/>
         </FrameLayout>
 
-        <Button android:id="@+id/skipBtn"
-            android:text="@string/skip_ad_remaining_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:color="#66FF0000"
-            android:alpha="0.5"
-            android:layout_marginEnd="10dp" />
-
         <ImageView
             android:id="@+id/nextAdThumbnail"
             android:layout_width="60dp"
