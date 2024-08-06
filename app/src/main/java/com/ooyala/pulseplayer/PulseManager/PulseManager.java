@@ -434,7 +434,7 @@ public class PulseManager implements PulseSessionListener {
         }
         newRequestSettings.setMaxBitRate(800);
         newRequestSettings.setAdvertisingID("96bd03b6-defc-4203-83d3-dc1c730801f7");
-        newRequestSettings.setApplicationName("pulseplayer");
+        newRequestSettings.setApplicationName(context.getString(R.string.app_name));
         newRequestSettings.setApplicationVersion(BuildConfig.VERSION_NAME);
         newRequestSettings.setApplicationID(BuildConfig.APPLICATION_ID);
         newRequestSettings.setApplicationBundle("applicationBundle");
