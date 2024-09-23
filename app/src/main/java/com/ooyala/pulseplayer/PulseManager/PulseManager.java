@@ -14,15 +14,24 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayerFactory;
+
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
+
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.dash.DashMediaSource;
+import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.ooyala.pulse.ContentMetadata;
 import com.ooyala.pulse.Error;
@@ -57,7 +66,7 @@ public class PulseManager implements PulseSessionListener {
     private PlayerView playerView;
     private View adView;
     private ImageView nextAdThumbnail;
-    private SimpleExoPlayer exoPlayerInstance;
+    private ExoPlayer exoPlayerInstance;
     private MediaSource mediaSource;
     private MediaSource nextAdMediaSource;
     private Button skipBtn;
@@ -467,14 +476,15 @@ public class PulseManager implements PulseSessionListener {
      * @return the selected media file.
      */
     private MediaFile selectAppropriateMediaFile(List<MediaFile> potentialMediaFiles) {
-        MediaFile selected = null;
-        int highestBitrate = 0;
-        for (MediaFile file : potentialMediaFiles) {
-            if (file.getBitRate() > highestBitrate) {
-                highestBitrate = file.getBitRate();
-                selected = file;
-            }
-        }
+//        MediaFile selected = null;
+        MediaFile selected = potentialMediaFiles.get(0);
+//        int highestBitrate = 0;
+//        for (MediaFile file : potentialMediaFiles) {
+//            if (file.getBitRate() > highestBitrate) {
+//                highestBitrate = file.getBitRate();
+//                selected = file;
+//            }
+//        }
         return selected;
     }
 
@@ -483,7 +493,7 @@ public class PulseManager implements PulseSessionListener {
     public void initializePlayer() {
         //Get the selected videoItem from the bundled information.
         if (exoPlayerInstance == null) {
-            exoPlayerInstance = ExoPlayerFactory.newSimpleInstance(context);
+            exoPlayerInstance = new ExoPlayer.Builder(context).build();
         }
         exoPlayerInstance.addListener(playbackStateListener);
         exoPlayerInstance.setPlayWhenReady(playWhenReady);
@@ -536,24 +546,27 @@ public class PulseManager implements PulseSessionListener {
     }
 
     private MediaSource buildMediaSource(String uri) {
-        // This is the MediaSource representing the media to be played.
-        // Getting media from raw resource
-
-        String userAgent = Util.getUserAgent(context, context.getString(R.string.app_name));
-
-        // Default parameters, except allowCrossProtocolRedirects is true
-        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
-                userAgent,
-                null /* listener */,
-                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
-                true /* allowCrossProtocolRedirects */
-        );
-
-        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
-
-        return new ExtractorMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(Uri.parse(uri));
+        if (uri.endsWith(".m3u8")) {
+            // Create a data source factory.
+            DataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
+            // Create a HLS media source pointing to a playlist uri.
+            HlsMediaSource hlsMediaSource =
+                    new HlsMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(uri));
+            mediaSource = hlsMediaSource;
+        } else if (uri.endsWith(".mpd")) {
+            // Create a data source factory.
+            DataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
+            // Create a HLS media source pointing to a playlist uri.
+            DashMediaSource dashMediaSource =
+                    new DashMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(uri));
+            mediaSource = dashMediaSource;
+        } else if (uri.endsWith(".mp4")) {
+            mediaSource = new ProgressiveMediaSource.Factory(new DefaultDataSource.Factory(context))
+                    .createMediaSource(MediaItem.fromUri(uri));
+        }
+        return mediaSource;
     }
 
     /**
@@ -905,7 +918,7 @@ public class PulseManager implements PulseSessionListener {
         });
     }
 
-    class ExoPlayerEventListener implements Player.EventListener {
+    class ExoPlayerEventListener implements Player.Listener {
 
         private final String TAG = ExoPlayerEventListener.class.getName();
 
@@ -985,45 +998,17 @@ public class PulseManager implements PulseSessionListener {
         }
 
         @Override
-        public void onPlayerError(ExoPlaybackException error) {
+        public void onPlayerError(PlaybackException error) {
             final String what;
             Log.e(TAG, error.getMessage() == null ? "" : error.getMessage());
-            switch (error.type) {
-                case ExoPlaybackException.TYPE_SOURCE:
-                    what = error.getSourceException().getMessage();
-                    Log.e(TAG, "TYPE_SOURCE: " + what);
-                    if (playAd) {
-                        currentPulseVideoAd.adFailed(PulseAdError.REQUEST_FAILED);
-                    } else if (playVideoContent) {
-                        Log.i(TAG, "unknown media playback error");
-                    }
-                    break;
-
-                case ExoPlaybackException.TYPE_RENDERER:
-                    what = error.getRendererException().getMessage();
-                    Log.e(TAG, "TYPE_RENDERER: " + what);
-                    if (playAd) {
-                        currentPulseVideoAd.adFailed(PulseAdError.REQUEST_TIMED_OUT);
-                    } else if (playVideoContent) {
-                        Log.i(TAG, "server connection died");
-                    }
-                    break;
-
-                case ExoPlaybackException.TYPE_UNEXPECTED:
-                    what = error.getUnexpectedException().getMessage();
-                    Log.e(TAG, "TYPE_UNEXPECTED: " + what);
-                    if (playAd) {
-                        currentPulseVideoAd.adFailed(PulseAdError.COULD_NOT_PLAY);
-                    } else if (playVideoContent) {
-                        Log.i(TAG, "generic audio playback error");
-                    }
-                    break;
-            }
+            Log.e(TAG,  error.getMessage());
             if (playAd) {
+                currentPulseVideoAd.adFailed(PulseAdError.REQUEST_FAILED);
                 playAd = false;
                 duringAd = false;
                 playbackHandler.removeCallbacks(playbackRunnable);
             } else if (playVideoContent) {
+                Log.i(TAG, "media playback error : " + error.getErrorCodeName());
                 playVideoContent = false;
                 duringVideoContent = false;
             }

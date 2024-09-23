@@ -70,10 +70,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //     user identifier here.
         // Refer to:
         //     http://support.ooyala.com/developers/ad-documentation/oadtech/ad_serving/dg/integration_sdk_parameter.html
-        Pulse.setPulseHost("https://pulse-demo.videoplaza.tv", null, null);
+        Pulse.setPulseHost("https://vp-atelikicherla.videoplaza.tv", null, null);
 
         if (videoJSonString != null) {
-
 
             JSONArray videoContentsJSON = null;
             try {
