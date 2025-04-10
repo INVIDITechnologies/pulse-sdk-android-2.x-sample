@@ -51,13 +51,29 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     testImplementation 'junit:junit:4.12'
     implementation 'androidx.appcompat:appcompat:1.4.0'
-    implementation 'com.google.android.exoplayer:exoplayer-core:2.13.3'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.13.3'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.0'
     implementation 'androidx.leanback:leanback:1.0.0'
-    implementation 'androidx.media3:media3-exoplayer:1.1.0'
-    implementation 'androidx.media3:media3-ui:1.1.0'
-    implementation 'androidx.media3:media3-exoplayer-dash:1.1.0'
+
+
+    implementation ('com.google.android.exoplayer:exoplayer-core:2.13.3') {
+        exclude group: 'androidx.media3'
+        exclude group: 'androidx.media3.ui.AspectRatioFrameLayout'
+    }
+    implementation ('com.google.android.exoplayer:exoplayer-ui:2.13.3'){
+        exclude group: 'androidx.media3.ui.AspectRatioFrameLayout'
+    }
+
+    implementation ('androidx.media3:media3-exoplayer:1.2.0') {
+        exclude group: 'com.google.android.exoplayer'
+        exclude group: 'com.google.android.exoplayer2.ui.AspectRatioFrameLayout'
+    }
+    implementation ('androidx.media3:media3-ui:1.2.0'){
+        exclude group: 'com.google.android.exoplayer2.ui.AspectRatioFrameLayout'
+    }
+
+    implementation 'androidx.media3:media3-exoplayer-dash:1.2.0'
+
+
 
     //Change this line to match the downloaded Pulse SDK library.
     //implementation (name:"pulse.2.6.25.2.0", ext:"aar")
