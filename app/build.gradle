@@ -17,6 +17,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    flavorDimensions += "contentType"
+
+    productFlavors {
+        live {
+            dimension "contentType"
+            buildConfigField "String", "CONTENT_MODE", '"LIVE"'
+        }
+        vod {
+            dimension "contentType"
+            buildConfigField "String", "CONTENT_MODE", '"VOD"'
+        }
+    }
+
     compileOptions {
         targetCompatibility = 1.8
         sourceCompatibility = 1.8

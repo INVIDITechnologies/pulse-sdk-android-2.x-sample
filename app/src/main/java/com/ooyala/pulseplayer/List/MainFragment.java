@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.model.VideoItem;
 import com.ooyala.pulseplayer.utils.CardPresenter;
+import com.ooyala.pulseplayer.utils.FlavorUtils;
 import com.ooyala.pulseplayer.videoPlayer.VideoPlayerVODActivity;
 import com.ooyala.pulseplayer.videoPlayer.VideoPlayerLiveActivity;
 
@@ -55,7 +56,7 @@ public class MainFragment extends BrowseSupportFragment {
         setupUIElements();
 
         //Load json file containing VideoItems from resource.
-        String videoJSonString = loadJSONFile(getResources().getIdentifier("raw/library", "raw", getActivity().getPackageName()));
+        String videoJSonString = loadJSONFile(FlavorUtils.getVideoLibraryRawResId());
         if (videoJSonString != null) {
             JSONArray videoContentsJSON = null;
             try {
@@ -139,7 +140,7 @@ public class MainFragment extends BrowseSupportFragment {
 
             if (item instanceof VideoItem) {
                 VideoItem videoItem = (VideoItem) item;
-                Intent intent = new Intent(getActivity(), VideoPlayerLiveActivity.class);
+                Intent intent = new Intent(getActivity(), FlavorUtils.getVideoPlayerActivityClass());
                 intent.putExtra("contentMetadataTags", videoItem.getTags());
                 intent.putExtra("midrollPositions", videoItem.getMidrollPositions());
                 intent.putExtra("contentTitle", videoItem.getContentTitle());
