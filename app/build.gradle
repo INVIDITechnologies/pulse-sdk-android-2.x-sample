@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 34
+    compileSdkVersion 35
 
     defaultConfig {
         applicationId "com.ooyala.pulseplayer"
-        minSdkVersion 17
-        targetSdkVersion 34
+        minSdkVersion 21
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -41,8 +41,11 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.13.3'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.0'
     implementation 'androidx.leanback:leanback:1.0.0'
+    implementation 'androidx.media3:media3-exoplayer:1.1.0'
+    implementation 'androidx.media3:media3-ui:1.1.0'
+    implementation 'androidx.media3:media3-exoplayer-dash:1.1.0'
 
     //Change this line to match the downloaded Pulse SDK library.
-    implementation (name:"pulse.2.6.25.2.0", ext:"aar")
-    //implementation project(path: ':library')
+    //implementation (name:"pulse.2.6.25.2.0", ext:"aar")
+    implementation project(path: ':library')
 }

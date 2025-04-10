@@ -25,7 +25,8 @@ import android.widget.Toast;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.model.VideoItem;
 import com.ooyala.pulseplayer.utils.CardPresenter;
-import com.ooyala.pulseplayer.videoPlayer.VideoPlayerActivity;
+import com.ooyala.pulseplayer.videoPlayer.VideoPlayerVODActivity;
+import com.ooyala.pulseplayer.videoPlayer.VideoPlayerLiveActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -138,7 +139,7 @@ public class MainFragment extends BrowseSupportFragment {
 
             if (item instanceof VideoItem) {
                 VideoItem videoItem = (VideoItem) item;
-                Intent intent = new Intent(getActivity(), VideoPlayerActivity.class);
+                Intent intent = new Intent(getActivity(), VideoPlayerLiveActivity.class);
                 intent.putExtra("contentMetadataTags", videoItem.getTags());
                 intent.putExtra("midrollPositions", videoItem.getMidrollPositions());
                 intent.putExtra("contentTitle", videoItem.getContentTitle());

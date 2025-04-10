@@ -7,7 +7,6 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.UiModeManager;
-import android.content.res.Configuration;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -35,7 +34,7 @@ import java.util.List;
 /**
  * An activity for playing ad video and content. This activity employs a PulseManager instance to manage the Pulse session.
  */
-public class VideoPlayerActivity extends AppCompatActivity {
+public class VideoPlayerVODActivity extends AppCompatActivity {
     static final int OPEN_BROWSER_REQUEST = 1365;
     public static PulseManager pulseManager;
     private PlayerView playerView;
@@ -47,7 +46,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private ImageView nextAdThumbnail;
     List<FriendlyObstruction> friendlyObs = new ArrayList<>();
     private boolean mExoPlayerFullscreen = false;
-    private static final String TAG = VideoPlayerActivity.class.getName();
+    private static final String TAG = VideoPlayerVODActivity.class.getName();
     private   UiModeManager uiMode;
 
     @Override

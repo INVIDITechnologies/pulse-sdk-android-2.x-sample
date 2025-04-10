@@ -17,7 +17,8 @@ import com.ooyala.pulse.LogListener;
 import com.ooyala.pulse.Pulse;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.model.VideoItem;
-import com.ooyala.pulseplayer.videoPlayer.VideoPlayerActivity;
+import com.ooyala.pulseplayer.videoPlayer.VideoPlayerVODActivity;
+import com.ooyala.pulseplayer.videoPlayer.VideoPlayerLiveActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Load json file containing VideoItems from resource.
-        String videoJSonString = loadJSONFile(getResources().getIdentifier("raw/library", "raw", getPackageName()));
+        String videoJSonString = loadJSONFile(getResources().getIdentifier("raw/library_live", "raw", getPackageName()));
 
         //Enable logging of debug messages.
         Pulse.logDebugMessages(true);
@@ -229,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         VideoItem selection = selectionMap.get(selectionAdapter.getItem(position));
 
-        Intent intent = new Intent(this, VideoPlayerActivity.class);
+        Intent intent = new Intent(this, VideoPlayerLiveActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 
         intent.putExtra("contentMetadataTags", selection.getTags());
