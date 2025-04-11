@@ -174,7 +174,7 @@ public class VideoPlayerVODActivity extends AppCompatActivity {
         if (mExoPlayerFullscreen) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
             mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, com.google.android.exoplayer2.ui.R.drawable.exo_controls_fullscreen_exit));
+            mFullScreenIcon.setImageDrawable(getDrawable(R.drawable.exit_full_screen));
             mFullScreenDialog.show();
         }
  //       pulseManager.setCallBackHandler(PulseManager.contentProgressHandler);
@@ -211,7 +211,7 @@ public class VideoPlayerVODActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         ((ViewGroup) playerView.getParent()).removeView(playerView);
         mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, com.google.android.exoplayer2.ui.R.drawable.exo_controls_fullscreen_exit));
+        mFullScreenIcon.setImageDrawable(getDrawable(R.drawable.exit_full_screen));
         mExoPlayerFullscreen = true;
         mFullScreenDialog.show();
         // In order to test removeAllFriendlyObstructions, call below method to unregistered friendly obstructions after entering into fullScreen.
@@ -229,7 +229,7 @@ public class VideoPlayerVODActivity extends AppCompatActivity {
         ((FrameLayout) findViewById(R.id.main_media_frame)).addView(playerView);
         mExoPlayerFullscreen = false;
         mFullScreenDialog.dismiss();
-        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, com.google.android.exoplayer2.ui.R.drawable.exo_controls_fullscreen_exit));
+        mFullScreenIcon.setImageDrawable(getDrawable(R.drawable.exit_full_screen));
         pulseManager.sendExitFullScreenEvent();
     }
 
