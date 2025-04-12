@@ -1,7 +1,6 @@
 package com.ooyala.pulseplayer.videoPlayer;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.app.UiModeManager;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -9,12 +8,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.media3.common.util.UnstableApi;
-import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 
 import com.ooyala.pulseplayer.PulseManager.PulseManagerLive;
@@ -22,11 +19,10 @@ import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.model.VideoItem;
 
 @UnstableApi public class VideoPlayerLiveActivity extends AppCompatActivity {
-    static final int OPEN_BROWSER_REQUEST = 1365;
     public static PulseManagerLive pulseManagerLive;
     private PlayerView playerView;
-    private View adView;
     private Button skipButton;
+    private Button triggerAdBreakBtn;
     private UiModeManager uiMode;
 
     @OptIn(markerClass = UnstableApi.class)
@@ -50,11 +46,11 @@ import com.ooyala.pulseplayer.model.VideoItem;
         skipButton = (Button) findViewById(R.id.skipBtn);
         skipButton.setVisibility(View.INVISIBLE);
         playerView = findViewById(R.id.exoPlayerView);
+        triggerAdBreakBtn = (Button) findViewById(R.id.adBreak);
 
         playerView.showController();
         playerView.setControllerShowTimeoutMs(-1);
         uiMode = (UiModeManager) getSystemService(UI_MODE_SERVICE);
-        adView = findViewById(R.id.exo_content_frame);
 
         if (uiMode.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
             skipButton.setFocusableInTouchMode(true);
@@ -67,10 +63,9 @@ import com.ooyala.pulseplayer.model.VideoItem;
         }
 
         //Instantiate Pulse manager with selected data.
-        pulseManagerLive = new PulseManagerLive(videoItem, playerView, adView, skipButton, this, this);
+        pulseManagerLive = new PulseManagerLive(videoItem, playerView, triggerAdBreakBtn, this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
-
 
     }
 
