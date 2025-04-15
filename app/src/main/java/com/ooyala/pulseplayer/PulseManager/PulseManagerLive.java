@@ -100,12 +100,20 @@ public class PulseManagerLive implements PulseLiveSessionListener, PulseLiveAdBr
         contentStarted = true;
 
         triggerAdBreakBtn.setOnClickListener(v -> {
-            if (!contentStarted) {
-                adBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.PREROLL);
-            } else {
-                adBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.MIDROLL, 20);
-            }
+            RequestSettings.AdBreakType adBreakType = contentStarted
+                    ? RequestSettings.AdBreakType.MIDROLL
+                    : RequestSettings.AdBreakType.PREROLL;
+
+            adBreak = contentStarted
+                    ? pulseLiveSession.getAdBreak(adBreakType, 20)
+                    : pulseLiveSession.getAdBreak(adBreakType);
+
+            showAds(adBreak);
         });
+    }
+
+    private void showAds(PulseLiveAdBreak adBreak){
+        adBreak.getAllLinearAds(ads -> playAd(ads.get(0)));
     }
 
     protected void playAd(PulseVideoAd ad) {
@@ -170,11 +178,6 @@ public class PulseManagerLive implements PulseLiveSessionListener, PulseLiveAdBr
         ContentMetadata contentMetadata = new ContentMetadata();
         contentMetadata.setTags(new ArrayList<>(Arrays.asList(videoItem.getTags())));
         return contentMetadata;
-    }
-
-    @Override
-    public void onSuccess(List<PulseVideoAd> ads) {
-        playAd(ads.get(0));
     }
 
     @Override
