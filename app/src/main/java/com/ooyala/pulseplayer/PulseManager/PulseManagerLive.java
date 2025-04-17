@@ -6,6 +6,8 @@ import android.content.Context;
 import android.widget.Button;
 
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
@@ -50,6 +52,10 @@ public class PulseManagerLive implements PulseLiveSessionListener, PulseLiveAdBr
     private DefaultHttpDataSource.Factory httpDataSourceFactory;
     private Boolean contentStarted = false;
     PulseLiveAdBreak.AdListReadyCallback adListReadyCallback;
+
+    private int adBreakIndex = -1;
+    private Boolean adsAreFetched = false;
+    private List<PulseVideoAd> fetchedAds = null;
 
     public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Button triggerAdBreakBtn, Context context) {
         this.videoItem = videoItem;
@@ -104,36 +110,97 @@ public class PulseManagerLive implements PulseLiveSessionListener, PulseLiveAdBr
                     ? RequestSettings.AdBreakType.MIDROLL
                     : RequestSettings.AdBreakType.PREROLL;
 
-            adBreak = contentStarted
+            PulseLiveAdBreak mAdBreak = contentStarted
                     ? pulseLiveSession.getAdBreak(adBreakType, 20)
                     : pulseLiveSession.getAdBreak(adBreakType);
 
-            showAds(adBreak);
+            if (mAdBreak != null) {
+                adBreak = mAdBreak;
+                showAds(adBreak);
+            } else if (fetchedAds != null && adsAreFetched) {
+                handleAdPlayback(fetchedAds);
+            } else {
+                Log.e("PulseManagerLive", "Ad break is null. Cannot play ad.");
+            }
         });
     }
 
-    private void showAds(PulseLiveAdBreak adBreak){
-        adBreak.getAllLinearAds(ads -> playAd(ads.get(0)));
+    private void showAds(PulseLiveAdBreak adBreak) {
+
+        adBreak.getAllLinearAds(new AdListReadyCallback() {
+            @Override
+            public void onSuccess(List<PulseVideoAd> ads) {
+
+                handleAdPlayback(ads);
+            }
+        });
+
     }
+
+
+    private void handleAdPlayback(List<PulseVideoAd> ads) {
+        if (ads == null || ads.isEmpty()) {
+            adsAreFetched = false;
+            Log.w("PulseManagerLive", "No ads available.");
+            return;
+        }
+
+        adBreakIndex++;
+        adsAreFetched = true;
+
+        if (adBreakIndex < ads.size()) {
+            fetchedAds = ads;
+            playAd(ads.get(adBreakIndex));
+        } else {
+            Log.i("PulseManagerLive", "No more ads to show.");
+            triggerAdBreakBtn.setEnabled(false); // Disable the button
+            adsAreFetched = false;
+        }
+    }
+
 
     protected void playAd(PulseVideoAd ad) {
         MediaFile mediaFile = selectAppropriateMediaFile(ad.getMediaFiles());
         if (mediaFile != null) {
-            MediaItem mediaItem = new MediaItem.Builder().setMediaId(ad.getIdentifier()).setUri(mediaFile.getURI().toString()).build();
+            MediaItem mediaItem = new MediaItem.Builder()
+                    .setMediaId(ad.getIdentifier())
+                    .setUri(mediaFile.getURI().toString())
+                    .build();
 
             // Create a data source factory.
             DataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
             // Create a progressive media source pointing to a stream uri.
-            MediaSource adSource =
-                    new ProgressiveMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(mediaItem);
+            MediaSource adSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem);
+
+            // saving the reference to live stream media source
+            MediaSource resumeMediaSource = mediaSource;
 
             exoPlayer.setMediaSource(adSource);
             exoPlayer.prepare();
             exoPlayer.play();
             exoPlayer.setPlayWhenReady(true);
+
+            // listener to check when ad ends
+            exoPlayer.addListener(new Player.Listener() {
+                @Override
+                public void onPlaybackStateChanged(int playbackState) {
+                    if (playbackState == Player.STATE_ENDED) {
+                        // resuming original content
+                        exoPlayer.setMediaSource(resumeMediaSource);
+                        exoPlayer.prepare();
+                        exoPlayer.play();
+                        exoPlayer.seekToDefaultPosition();
+                        exoPlayer.setPlayWhenReady(true);
+
+                        // removing this listener to avoid being called again and again.
+                        exoPlayer.removeListener(this);
+                    }
+                }
+            });
         }
     }
+
 
     private MediaFile selectAppropriateMediaFile(List<MediaFile> potentialMediaFiles) {
         MediaFile selected = null;
