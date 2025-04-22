@@ -6,6 +6,22 @@
   "content-duration":  52,
   "content-url":       "https://vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 },{
+  "tags":             ["vast3.0_OMCert","vast4.1_OMCert"],
+  "category":         "skip-always",
+  "midroll-positions": [20],
+  "content-title":    "OMSDK Certification",
+  "content-id":       "omsdk",
+  "content-duration": 52,
+  "content-url":      "https://pulse-demo.vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
+},{
+  "tags":             ["vast3.0_OMCert","vast4.1_OMCert"],
+  "category":         "skip-always",
+  "midroll-positions": [20],
+  "content-title":    "OMSDK Certification - skipAd as friendly obstruction",
+  "content-id":       "omsdk",
+  "content-duration": 52,
+  "content-url":      "https://pulse-demo.vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
+},{
   "tags":             ["om_vast4.1","om_vast4.0"],
   "category":         "skip-always",
   "midroll-positions": [10, 20],
