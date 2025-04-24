@@ -1,6 +1,12 @@
 [{
-  "tags":              [],
-  "content-title":     "LiveScenario with Pre/Mid/Post-rolls",
-  "midroll-positions": [20,30,40],
+  "tags":              ["standard-midrolls"],
+  "content-title":     "Midroll",
+  "midroll-positions": [10, 20],
+  "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd"
+},
+{
+  "tags":              ["standard-prerolls"],
+  "content-title":     "Preroll",
+  "midroll-positions": [10, 20],
   "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd"
 }]

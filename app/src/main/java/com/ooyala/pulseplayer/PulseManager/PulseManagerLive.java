@@ -2,8 +2,10 @@ package com.ooyala.pulseplayer.PulseManager;
 
 
 import android.content.Context;
+import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.Nullable;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.Log;
@@ -38,10 +40,11 @@ import java.util.Arrays;
 import java.util.List;
 
 @UnstableApi
-public class PulseManagerLive implements PulseLiveSessionListener, PulseLiveAdBreak {
+public class PulseManagerLive implements PulseLiveSessionListener {
 
     private PulseLiveSession pulseLiveSession;
     private Button triggerAdBreakBtn;
+    private Button showAdsBtn;
     private PulseLiveAdBreak adBreak;
     private PlayerView playerView;
     private ExoPlayer exoPlayer;
@@ -49,31 +52,25 @@ public class PulseManagerLive implements PulseLiveSessionListener, PulseLiveAdBr
     private VideoItem videoItem = new VideoItem();
     private MediaSource mediaSource;
     private DefaultHttpDataSource.Factory httpDataSourceFactory;
-    private Boolean contentStarted = false;
     private int[] midrollPositions;
-    private int midrollIndex = 0;
-    private List<PulseVideoAd> currentAdList;
-    private int currentAdIndex = 0;
-    private String currentAdIdentifier = "";
+    private int midrollBreakIndex = 0;
+    private List<PulseLiveAdBreak> mAdBreaks = new ArrayList<PulseLiveAdBreak>();
+    private PulseVideoAd currentPulseVideoAd;
+    private static String TAG = "PulseLiveManager";
 
-    public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Button triggerAdBreakBtn, Context context) {
+    public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Button triggerAdBreakBtn, Button showAdsBtn, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.context = context;
         this.triggerAdBreakBtn = triggerAdBreakBtn;
+        this.showAdsBtn = showAdsBtn;
 
         // Create and start a pulse session
         pulseLiveSession = Pulse.createLiveSession(getContentMetadata(), getRequestSettings(), this);
         initializePlayer();
     }
 
-    /* A private Constructor prevents any other
-     * class from instantiating.
-     */
-    private PulseManagerLive() {
-    }
     /////////////////////Playback helper////////////////////
-
     public void initializePlayer() {
         exoPlayer = new ExoPlayer.Builder(context).build();
         playerView.setPlayer(exoPlayer);
@@ -85,107 +82,117 @@ public class PulseManagerLive implements PulseLiveSessionListener, PulseLiveAdBr
                 .setUserAgent(userAgent);
 
         DataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
+
+        MediaItem mediaItem = new MediaItem.Builder()
+                .setMediaId(mediaType.CONTENT.getMessage())
+                .setUri(videoItem.getContentUrl())
+                .build();
+
         // Create a dash media source pointing to a dash manifest uri.
         mediaSource =
                 new DashMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(MediaItem.fromUri(videoItem.getContentUrl()));
+                        .createMediaSource(mediaItem);
 
         exoPlayer.setMediaSource(mediaSource);
         exoPlayer.prepare();
         exoPlayer.play();
-        exoPlayer.setPlayWhenReady(true);
-        contentStarted = true;
-
+        exoPlayer.addListener(playbackListener);
+        exoPlayer.setPlayWhenReady(false);
         midrollPositions = videoItem.getMidrollPositions();
         if (midrollPositions == null) midrollPositions = new int[0];
 
-        triggerAdBreakBtn.setOnClickListener(v -> {
-            RequestSettings.AdBreakType adBreakType = contentStarted
-                    ? RequestSettings.AdBreakType.MIDROLL
-                    : RequestSettings.AdBreakType.PREROLL;
-
-            if (midrollIndex < midrollPositions.length) {
-                int position = midrollPositions[midrollIndex++];
-                PulseLiveAdBreak mAdBreak = contentStarted
-                        ? pulseLiveSession.getAdBreak(adBreakType, position)
-                        : pulseLiveSession.getAdBreak(adBreakType);
-
-                if (mAdBreak != null) {
-                    adBreak = mAdBreak;
-                    showAds(adBreak);
-                }
-            } else {
-                Log.e("PulseManagerLive", "Ad break is null. Cannot play ad.");
+        if ("Preroll".equals(videoItem.getContentTitle())) {
+            PulseLiveAdBreak pAdBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.PREROLL);
+            if (pAdBreak != null) {
+                pAdBreak.getAllLinearAds(this::prepareAdsForPlay);
+                exoPlayer.seekToNextMediaItem();
             }
-        });
+            exoPlayer.setPlayWhenReady(true);
+        } else {
+            exoPlayer.setPlayWhenReady(true);
+            triggerAdBreakBtn.setOnClickListener(v -> {
+                if (midrollBreakIndex < midrollPositions.length) {
+                    int position = midrollPositions[midrollBreakIndex++];
+                    PulseLiveAdBreak mAdBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.MIDROLL, position);
+
+                    if (mAdBreak != null) {
+                        mAdBreak.getAllLinearAds(this::prepareAdsForPlay);
+                        mAdBreaks.add(mAdBreak);
+                    }
+                } else {
+                    Log.e(TAG, "Ad break is null.");
+                }
+            });
+
+            showAdsBtn.setOnClickListener(v -> {
+                if (mAdBreaks != null && mAdBreaks.size() > 0) {
+                    adBreak = mAdBreaks.get(0);
+                    exoPlayer.seekToNextMediaItem();
+                    showAdsBtn.setVisibility(View.INVISIBLE);
+                } else {
+                    Log.d(TAG, "No AdBreak available.");
+                }
+            });
+        }
     }
 
-    private void showAds(PulseLiveAdBreak adBreak) {
-        adBreak.getAllLinearAds(this::handleAdPlayback);
-    }
-
-    private void handleAdPlayback(List<PulseVideoAd> ads) {
+    private void prepareAdsForPlay(List<PulseVideoAd> ads) {
         if (ads == null || ads.isEmpty()) {
             Log.w("PulseManagerLive", "No ads available.");
             return;
         }
-        playAd(ads, 0); // Start with first ad
-    }
-
-
-    private void playAd(List<PulseVideoAd> ads, int index) {
-        currentAdList = ads;
-        currentAdIndex = index;
-
-        if (index >= ads.size()) {
-            Log.i("PulseManagerLive", "All ads completed. Resuming content.");
-            resumeContentPlayback();
-            return;
+        int adIndex = 0;
+        for (PulseVideoAd ad : ads) {
+            MediaFile mediaFile = selectAppropriateMediaFile(ad.getMediaFiles());
+            if (mediaFile != null) {
+                MediaItem mediaItem = new MediaItem.Builder()
+                        .setMediaId(mediaType.AD.getMessage())
+                        .setUri(mediaFile.getURI().toString())
+                        .setTag(ad)
+                        .build();
+                MediaSource adSource = new ProgressiveMediaSource.Factory(httpDataSourceFactory)
+                        .createMediaSource(mediaItem);
+                adIndex++;
+                exoPlayer.addMediaSource(adSource);
+            }
         }
-
-        PulseVideoAd ad = ads.get(index);
-        currentAdIdentifier = ad.getIdentifier();
-        MediaFile mediaFile = selectAppropriateMediaFile(ad.getMediaFiles());
-
-        if (mediaFile != null) {
-            Log.i("PulseManagerLive", "Starting Ad " + (index + 1) + "/" + ads.size());
-
-            MediaItem mediaItem = new MediaItem.Builder()
-                    .setMediaId(ad.getIdentifier())
-                    .setUri(mediaFile.getURI().toString())
-                    .build();
-
-            MediaSource adSource = new ProgressiveMediaSource.Factory(httpDataSourceFactory)
-                    .createMediaSource(mediaItem);
-
-            exoPlayer.setMediaSource(adSource);
-            exoPlayer.prepare();
-            exoPlayer.setPlayWhenReady(true);
-            exoPlayer.addListener(adPlaybackListener);
-
-        } else {
-            playAd(ads, index + 1);
+        if (adIndex > 0) {
+            if (midrollBreakIndex > 0) {
+                Log.d(TAG, String.format("%d ads are added for adBreak %d", adIndex, midrollBreakIndex));
+            } else {
+                Log.d(TAG, String.format("%d ads are added for preroll or postroll adBreak.", adIndex));
+            }
+            exoPlayer.addMediaSource(mediaSource);
         }
     }
 
-    private final Player.Listener adPlaybackListener = new Player.Listener() {
+    private final Player.Listener playbackListener = new Player.Listener() {
         @Override
         public void onPlaybackStateChanged(int playbackState) {
-            if (playbackState == Player.STATE_ENDED) {
-                exoPlayer.removeListener(this);
-                Log.i("PulseManagerLive", "Completed Ad: " + currentAdIdentifier);
-                playAd(currentAdList, currentAdIndex + 1);
+
+        }
+
+        @Override
+        public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
+            if (mediaItem.mediaId == mediaType.AD.getMessage()) {
+                Log.d(TAG, "onMediaItemTransition - reason: Ad playback Started");
+                currentPulseVideoAd = (PulseVideoAd) mediaItem.localConfiguration.tag;
+                currentPulseVideoAd.adStarted();
+            } else {
+                Log.d(TAG, "onMediaItemTransition - reason: Content Started/Resumed");
+                showAdsBtn.setVisibility(View.VISIBLE);
             }
         }
     };
 
-    private void resumeContentPlayback() {
-        exoPlayer.setMediaSource(mediaSource);
-        exoPlayer.prepare();
-        exoPlayer.play();
-        exoPlayer.seekToDefaultPosition();
-        exoPlayer.setPlayWhenReady(true);
-    }
+//    private void resumeContentPlayback() {
+//        exoPlayer.setMediaSource(mediaSource);
+//        exoPlayer.prepare();
+//        exoPlayer.play();
+//        exoPlayer.seekToDefaultPosition();
+//        exoPlayer.setPlayWhenReady(true);
+//        showAdsBtn.setVisibility(View.VISIBLE);
+//    }
 
     private MediaFile selectAppropriateMediaFile(List<MediaFile> potentialMediaFiles) {
         MediaFile selected = null;
@@ -198,8 +205,6 @@ public class PulseManagerLive implements PulseLiveSessionListener, PulseLiveAdBr
         }
         return selected;
     }
-
-
 
     //////////////////////////// Helper Methods ///////////////////////////////
 
@@ -242,18 +247,15 @@ public class PulseManagerLive implements PulseLiveSessionListener, PulseLiveAdBr
 
     }
 
-    @Override
-    public int getPlayableAdsTotal() {
-        return 0;
-    }
-
-    @Override
-    public void getAllLinearAds(AdListReadyCallback adListReadyCallback) {
-       adBreak.getAllLinearAds(adListReadyCallback);
-    }
-
-    @Override
-    public RequestSettings.AdBreakType getAdBreakType() {
-        return null;
+    private enum mediaType {
+        AD ("ad"),
+        CONTENT ("content");
+        private String message;
+        mediaType(String s) {
+            this.message = s;
+        }
+        public String getMessage() {
+            return message;
+        }
     }
 }
