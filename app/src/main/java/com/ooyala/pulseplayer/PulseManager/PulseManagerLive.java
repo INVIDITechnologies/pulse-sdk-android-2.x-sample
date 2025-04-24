@@ -7,6 +7,7 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
@@ -24,6 +25,7 @@ import com.ooyala.pulse.ContentMetadata;
 import com.ooyala.pulse.MediaFile;
 import com.ooyala.pulse.Pulse;
 
+import com.ooyala.pulse.PulseAdError;
 import com.ooyala.pulse.PulseLiveAdBreak;
 import com.ooyala.pulse.PulseLiveSession;
 import com.ooyala.pulse.PulseLiveSessionListener;
@@ -168,31 +170,34 @@ public class PulseManagerLive implements PulseLiveSessionListener {
 
     private final Player.Listener playbackListener = new Player.Listener() {
         @Override
-        public void onPlaybackStateChanged(int playbackState) {
-
-        }
-
-        @Override
         public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
+            if (currentPulseVideoAd != null) {
+                currentPulseVideoAd.adFinished();
+            }
             if (mediaItem.mediaId == mediaType.AD.getMessage()) {
                 Log.d(TAG, "onMediaItemTransition - reason: Ad playback Started");
                 currentPulseVideoAd = (PulseVideoAd) mediaItem.localConfiguration.tag;
                 currentPulseVideoAd.adStarted();
             } else {
                 Log.d(TAG, "onMediaItemTransition - reason: Content Started/Resumed");
+                currentPulseVideoAd = null;
                 showAdsBtn.setVisibility(View.VISIBLE);
             }
         }
-    };
 
-//    private void resumeContentPlayback() {
-//        exoPlayer.setMediaSource(mediaSource);
-//        exoPlayer.prepare();
-//        exoPlayer.play();
-//        exoPlayer.seekToDefaultPosition();
-//        exoPlayer.setPlayWhenReady(true);
-//        showAdsBtn.setVisibility(View.VISIBLE);
-//    }
+        @Override
+        public void onPlayerError(PlaybackException error) {
+            Log.w(TAG, "onPlayerError - error (" + error.errorCode + "): " + error.getMessage());
+            if (exoPlayer.getCurrentMediaItem().mediaId == mediaType.AD.getMessage()) {
+                Log.d(TAG, "onPlayerError Method, currentPulseVideoAd is:" + currentPulseVideoAd.getTitle() + " : " + currentPulseVideoAd.getIdentifier());
+                try {
+                    currentPulseVideoAd.adFailed(PulseAdError.COULD_NOT_PLAY);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
+            }
+        }
+    };
 
     private MediaFile selectAppropriateMediaFile(List<MediaFile> potentialMediaFiles) {
         MediaFile selected = null;
@@ -248,12 +253,14 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     }
 
     private enum mediaType {
-        AD ("ad"),
-        CONTENT ("content");
+        AD("ad"),
+        CONTENT("content");
         private String message;
+
         mediaType(String s) {
             this.message = s;
         }
+
         public String getMessage() {
             return message;
         }
