@@ -115,49 +115,67 @@ public class PulseManagerLive implements PulseLiveSessionListener {
             if (midrollBreakIndex < playbackPosition.size()) {
                 Float position = playbackPosition.get(midrollBreakIndex++);
                 PulseLiveAdBreak mAdBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.MIDROLL, position);
+                Toast toast = Toast.makeText(context, "Triggerd getAdBreak for playback position - " + playbackPosition.get(midrollBreakIndex-1), Toast.LENGTH_LONG);
+                toast.show();
                 if (mAdBreak != null) {
                     mAdBreak.getAllLinearAds(this::prepareAdsForPlay);
                     mAdBreaks.add(mAdBreak);
                 }
             } else {
-                Toast toast = Toast.makeText(context, "No more AdBreaks were requested from Pulse", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(context, "No more playback position available for current session. Extend session to request for more breaks.", Toast.LENGTH_LONG);
                 toast.show();
-                Log.e(TAG, "Ad break is null.");
             }
 
         });
 
         showAdsBtn.setOnClickListener(v -> {
             if (mAdBreaks != null && !mAdBreaks.isEmpty()) {
-                exoPlayer.seekToNextMediaItem();
-                mAdBreaks.remove(0); //Remove the currently playing ad break details from the list. If there are no more remaining adbreaks, this if block should not be executed.
-                showAdsBtn.setVisibility(View.INVISIBLE); //Setting it invisible so user cannot start playing following break when previous break is already playing.
-                Toast toast = Toast.makeText(context, "Playing Ads for playback Position - ", Toast.LENGTH_LONG);
-                toast.show();
+                if (mAdBreaks.get(0).getPlayableAdsTotal()>0) {
+                    exoPlayer.seekToNextMediaItem();
+                    mAdBreaks.remove(0); //Remove the currently playing ad break details from the list. If there are no more remaining adbreaks, this if block should not be executed.
+                    showAdsBtn.setVisibility(View.INVISIBLE); //Setting it invisible so user cannot start playing following break when previous break is already playing.
+                } else {
+                    Toast toast = Toast.makeText(context, "No ads to show.", Toast.LENGTH_LONG);
+                    toast.show();
+                }
             } else {
                 Toast toast = Toast.makeText(context, "No AdBreak available", Toast.LENGTH_LONG);
                 toast.show();
-                Log.d(TAG, "No AdBreak available.");
             }
         });
 
         extendSessionBtn.setOnClickListener(v -> {
             requestSessionExtension();
-            playbackPosition.addAll(extendedPlaybackPositions);
+            if (extendedPlaybackPositions.size() > 0) {
+                playbackPosition.addAll(extendedPlaybackPositions);
+            }
         });
     }
 
     private void prepareAdsForPlay (List < PulseVideoAd > ads) {
         if (ads == null || ads.isEmpty()) {
             Log.w("PulseManagerLive", "No ads available.");
+            CharSequence text = "Inventory ad returned from Pulse for Preroll position.";
+            if (midrollBreakIndex > 0) {
+                text = "Inventory ad returned from Pulse for playback position - " + playbackPosition.get(midrollBreakIndex - 1);
+            }
+            Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
+            toast.show();
             return;
         }
         int adIndex = 0;
         for (PulseVideoAd ad : ads) {
             MediaFile mediaFile = selectAppropriateMediaFile(ad.getMediaFiles());
             if (mediaFile != null) {
-                MediaMetadata mediaMetadata = new MediaMetadata.Builder()
-                        .setDisplayTitle("Playing ads for playback position: " + playbackPosition.get(midrollBreakIndex - 1)).build();
+                CharSequence displayTitle = "Playing ads for Preroll Break";
+                if (midrollBreakIndex > 0) {
+                    displayTitle = "Playing ads for playback position: " + playbackPosition.get(midrollBreakIndex - 1);
+                }
+                MediaMetadata mediaMetadata = new MediaMetadata
+                        .Builder()
+                        .setDisplayTitle(displayTitle)
+                        .build();
+
                 MediaItem mediaItem = new MediaItem.Builder()
                         .setMediaId(mediaType.AD.getMessage())
                         .setUri(mediaFile.getURI().toString())
@@ -192,7 +210,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
                 currentPulseVideoAd = (PulseVideoAd) mediaItem.localConfiguration.tag;
                 currentPulseVideoAd.adStarted();
                 startAdProgressTracking();
-                Toast toast = Toast.makeText(context, mediaItem.mediaMetadata.displayTitle, Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(context, mediaItem.mediaMetadata.displayTitle , Toast.LENGTH_LONG);
                 toast.show();
 
             } else {
@@ -306,8 +324,8 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         android.util.Log.i(TAG, "Request a session extension for two midrolls at 30s after previous midroll break.");
         RequestSettings updatedRequestSettings = new RequestSettings();
         List<Float> newPlaybackPositions = new ArrayList<>();
-        newPlaybackPositions.add(playbackPosition.get(playbackPosition.size() - 1) + 30);
-        newPlaybackPositions.add(playbackPosition.get(playbackPosition.size() - 1) + 60);
+        newPlaybackPositions.add(playbackPosition.size() > 0 ? (playbackPosition.get(playbackPosition.size() - 1) + 30) : 30);
+        newPlaybackPositions.add(playbackPosition.size() > 0 ? (playbackPosition.get(playbackPosition.size() - 1) + 60) : 60);
         updatedRequestSettings.setLinearPlaybackPositions(newPlaybackPositions);
         extendedPlaybackPositions = newPlaybackPositions;
         updatedRequestSettings.setInsertionPointFilter(Collections.singletonList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
@@ -322,18 +340,12 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     public void getStaggeringValues (ResponseHeader responseHeader){
         PulseLiveSessionListener.super.getStaggeringValues(responseHeader);
 
-        if ("Preroll".equals(videoItem.getContentTitle())) {
-            PulseLiveAdBreak pAdBreak =
-                    pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.PREROLL);
-
-            if (pAdBreak != null) {
-                pAdBreak.getAllLinearAds(this::prepareAdsForPlay);
-                exoPlayer.seekToNextMediaItem();
-            }
-            exoPlayer.setPlayWhenReady(true);
-        } else {
-            exoPlayer.setPlayWhenReady(true);
+        PulseLiveAdBreak pAdBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.PREROLL);
+        if (pAdBreak != null) {
+            pAdBreak.getAllLinearAds(this::prepareAdsForPlay);
+            exoPlayer.seekToNextMediaItem();
         }
+        exoPlayer.setPlayWhenReady(true);
     }
 
     @Override

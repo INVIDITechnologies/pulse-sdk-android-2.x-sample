@@ -1,12 +1,31 @@
 [{
+  "tags":              [],
+  "content-title":     "No Ads",
+  "midroll-positions": [10, 40],
+  "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd",
+  "test-description": "No Ads will be returned either in createSession or extendSession"
+},{
   "tags":              ["standard-midrolls"],
   "content-title":     "Midroll",
   "midroll-positions": [10, 40],
-  "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd"
-},
-{
+  "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd",
+  "test-description": "Only midroll breaks will be returned at position 10 and 40. If extend Session button is clicked, it will extend the session for 2 more midroll breaks at positions 30s and 60s later from the last break position."
+},{
   "tags":              ["standard-prerolls"],
   "content-title":     "Preroll",
   "midroll-positions": [],
-  "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd"
+  "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd",
+  "test-descriptiom": "Only preroll break will be returned. If extend Session button is clicked, it will extend the session for 2 midroll breaks at positions 30s and 60s later from last break position"
+},{
+  "tags":              ["standard-linears"],
+  "content-title":     "Pre/mid/post-rolls-firstPartyAds",
+  "midroll-positions": [10,40],
+  "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd",
+  "test-description": "Pre/Mid/Post all breaks will be returned. If extend Session button is clicked, it will extend the session for 2 midroll breaks at positions 30s and 60s later from last midroll break position"
+},{
+  "tags":              ["vast2","vast6"],
+  "content-title":     "2ThirdPartyMidrolls-noPreroll",
+  "midroll-positions": [10,40],
+  "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd",
+  "test-description": ""
 }]
