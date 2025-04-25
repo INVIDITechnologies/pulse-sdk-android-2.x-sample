@@ -9,10 +9,4 @@
   "content-title":     "Preroll",
   "midroll-positions": [],
   "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd"
-},
-{
-  "tags":              ["standard-linears"],
-  "content-title":     "Session extension",
-  "midroll-positions": [10,40],
-  "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd"
 }]

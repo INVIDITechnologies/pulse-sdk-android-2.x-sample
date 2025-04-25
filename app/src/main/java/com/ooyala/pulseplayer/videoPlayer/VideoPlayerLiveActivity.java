@@ -22,8 +22,6 @@ import com.ooyala.pulseplayer.model.VideoItem;
     public static PulseManagerLive pulseManagerLive;
     private PlayerView playerView;
     private Button skipButton;
-    private Button triggerAdBreakBtn;
-    private Button showAdsBtn;
     private UiModeManager uiMode;
 
     @OptIn(markerClass = UnstableApi.class)
@@ -47,8 +45,6 @@ import com.ooyala.pulseplayer.model.VideoItem;
         skipButton = (Button) findViewById(R.id.skipBtn);
         skipButton.setVisibility(View.INVISIBLE);
         playerView = findViewById(R.id.exoPlayerView);
-        triggerAdBreakBtn = (Button) findViewById(R.id.adBreak);
-        showAdsBtn = (Button) findViewById(R.id.showAds);
 
         playerView.showController();
         playerView.setControllerShowTimeoutMs(-1);
@@ -65,7 +61,7 @@ import com.ooyala.pulseplayer.model.VideoItem;
         }
 
         //Instantiate Pulse manager with selected data.
-        pulseManagerLive = new PulseManagerLive(videoItem, playerView, triggerAdBreakBtn, showAdsBtn,this);
+        pulseManagerLive = new PulseManagerLive(videoItem, playerView,this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
 
