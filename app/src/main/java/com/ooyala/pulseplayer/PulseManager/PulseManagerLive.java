@@ -2,6 +2,8 @@ package com.ooyala.pulseplayer.PulseManager;
 
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -37,6 +39,7 @@ import com.ooyala.pulse.RequestSettings;
 import com.ooyala.pulse.ResponseHeader;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.model.VideoItem;
+import com.ooyala.pulseplayer.utils.AdTrackingState;
 
 
 import java.util.ArrayList;
@@ -65,6 +68,15 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     private static String TAG = "PulseLiveManager";
 
     public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Context context) {
+    private Handler adProgressHandler = new Handler(Looper.getMainLooper());
+    private Runnable adProgressRunnable;
+
+    private final int AD_PROGRESS_INTERVAL = 200;
+
+    private AdTrackingState adTrackingState = new AdTrackingState();
+
+
+    public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Button triggerAdBreakBtn, Button showAdsBtn, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.context = context;
@@ -177,19 +189,23 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     private final Player.Listener playbackListener = new Player.Listener() {
         @Override
         public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
+
             if (currentPulseVideoAd != null) {
                 currentPulseVideoAd.adFinished();
             }
-            if (mediaItem.mediaId == mediaType.AD.getMessage()) {
+            if (mediaItem != null && mediaItem.mediaId.equals(mediaType.AD.getMessage())) {
                 Log.d(TAG, "onMediaItemTransition - reason: Ad playback Started");
                 currentPulseVideoAd = (PulseVideoAd) mediaItem.localConfiguration.tag;
                 currentPulseVideoAd.adStarted();
                 Toast toast = Toast.makeText(context, mediaItem.mediaMetadata.displayTitle, Toast.LENGTH_LONG);
                 toast.show();
+                adTrackingState.reset();
+                startAdProgressTracking();
             } else {
                 Log.d(TAG, "onMediaItemTransition - reason: Content Started/Resumed");
                 currentPulseVideoAd = null;
                 showAdsBtn.setVisibility(View.VISIBLE);
+                stopAdProgressTracking();
             }
         }
 
@@ -206,6 +222,79 @@ public class PulseManagerLive implements PulseLiveSessionListener {
             }
         }
     };
+
+    private void startAdProgressTracking() {
+        adProgressRunnable = new Runnable() {
+            @Override
+            public void run() {
+
+                long currentPlayerPosition = exoPlayer.getCurrentPosition();
+                MediaItem currentPlayerContent = exoPlayer.getCurrentMediaItem();
+
+                // to stop Runnable tracking if content ad is playing not our own ad break ads
+                if (currentPlayerContent == null || !mediaType.AD.getMessage().equals(currentPlayerContent.mediaId)) {
+                    Log.d(TAG, "Ad progress: tracking stopped.");
+                    stopAdProgressTracking();
+                    return;
+                }
+
+                float progress = (float) currentPlayerPosition / 1000;
+                currentPulseVideoAd.adPositionChanged(progress);
+
+                Log.d(TAG, "Ad Progress: " + progress);
+/*
+                if (!adTrackingState.firstQuartile && progress >= 0.25f) {
+                    adTrackingState.firstQuartile = true;
+                    Log.d(TAG, "Ad first quartile reached");
+                    // report to SDK
+                }
+
+                if (!adTrackingState.midpoint && progress >= 0.50f) {
+                    adTrackingState.midpoint = true;
+                    Log.d(TAG, "Ad midpoint reached");
+                    // report to SDK
+                }
+
+                if (!adTrackingState.thirdQuartile && progress >= 0.75f) {
+                    adTrackingState.thirdQuartile = true;
+                    Log.d(TAG, "Ad third quartile reached");
+                    // report to SDK
+                }
+
+                if (!adTrackingState.complete && progress >= 0.99f) {
+                    adTrackingState.complete = true;
+                    Log.d(TAG, "Ad completed/finished");
+                    // report to SDK
+                }
+*/
+                adProgressHandler.postDelayed(this, AD_PROGRESS_INTERVAL);
+
+            }
+
+
+        };
+        adProgressHandler.post(adProgressRunnable);
+    }
+
+    private void stopAdProgressTracking() {
+        if (adProgressRunnable != null) {
+            adProgressHandler.removeCallbacks(adProgressRunnable);
+            adProgressRunnable = null;
+            Log.d(TAG, "Ad progress: tracking stopped.");
+        }
+    }
+
+
+    public void releasePlayer() {
+        if (exoPlayer != null) {
+            exoPlayer.removeListener(playbackListener);
+            exoPlayer.release();
+            exoPlayer = null;
+        }
+        if (adProgressHandler != null) {
+            adProgressHandler.removeCallbacksAndMessages(null);
+        }
+    }
 
     private MediaFile selectAppropriateMediaFile(List<MediaFile> potentialMediaFiles) {
         MediaFile selected = null;
