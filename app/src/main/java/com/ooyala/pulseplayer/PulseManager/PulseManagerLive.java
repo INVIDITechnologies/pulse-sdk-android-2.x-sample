@@ -123,7 +123,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
                 if (mAdBreaks != null && !mAdBreaks.isEmpty()) {
                     adBreak = mAdBreaks.get(0);
                     exoPlayer.seekToNextMediaItem();
-                    showAdsBtn.setVisibility(View.INVISIBLE);
+                    showAdsBtn.setVisibility(View.INVISIBLE); //Setting it invisible so user cannot start playing following break when previous break is already playing.
                 } else {
                     Log.d(TAG, "No AdBreak available.");
                 }
