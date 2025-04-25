@@ -103,14 +103,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         midrollPositions = videoItem.getMidrollPositions();
         if (midrollPositions == null) midrollPositions = new int[0];
 
-        if ("Preroll".equals(videoItem.getContentTitle())) {
-            PulseLiveAdBreak pAdBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.PREROLL);
-            if (pAdBreak != null) {
-                pAdBreak.getAllLinearAds(this::prepareAdsForPlay);
-                exoPlayer.seekToNextMediaItem();
-            }
-            exoPlayer.setPlayWhenReady(true);
-        } else {
+        if ("Midroll".equals(videoItem.getContentTitle())) {
             exoPlayer.setPlayWhenReady(true);
             triggerAdBreakBtn.setOnClickListener(v -> {
                 if (midrollBreakIndex < midrollPositions.length) {
@@ -127,7 +120,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
             });
 
             showAdsBtn.setOnClickListener(v -> {
-                if (mAdBreaks != null && mAdBreaks.size() > 0) {
+                if (mAdBreaks != null && !mAdBreaks.isEmpty()) {
                     adBreak = mAdBreaks.get(0);
                     exoPlayer.seekToNextMediaItem();
                     showAdsBtn.setVisibility(View.INVISIBLE);
@@ -245,6 +238,17 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     @Override
     public void getStaggeringValues(ResponseHeader responseHeader) {
         PulseLiveSessionListener.super.getStaggeringValues(responseHeader);
+
+        if ("Preroll".equals(videoItem.getContentTitle())) {
+            PulseLiveAdBreak pAdBreak =
+                    pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.PREROLL);
+
+            if (pAdBreak != null) {
+                pAdBreak.getAllLinearAds(this::prepareAdsForPlay);
+                exoPlayer.seekToNextMediaItem();
+            }
+            exoPlayer.setPlayWhenReady(true);
+        }
     }
 
     @Override
