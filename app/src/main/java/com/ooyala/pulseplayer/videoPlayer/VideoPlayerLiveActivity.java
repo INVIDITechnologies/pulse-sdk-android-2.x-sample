@@ -81,4 +81,13 @@ import com.ooyala.pulseplayer.model.VideoItem;
 
         return selectedVideoItem;
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(pulseManagerLive != null){
+            pulseManagerLive.releasePlayer();
+            pulseManagerLive = null;
+        }
+    }
 }
