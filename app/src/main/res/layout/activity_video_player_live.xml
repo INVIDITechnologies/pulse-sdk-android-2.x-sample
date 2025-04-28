@@ -21,7 +21,8 @@
             android:layout_height="match_parent"
             android:gravity="center"
             app:resize_mode="fill"
-            app:use_controller="true" >
+            app:use_controller="true"
+            app:controller_layout_id="@layout/exo_player_control_view">
             
             <LinearLayout
                 android:layout_width="wrap_content"
