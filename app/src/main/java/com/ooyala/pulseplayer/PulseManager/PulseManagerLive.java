@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.solver.widgets.Helper;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.PlaybackException;
@@ -39,6 +40,7 @@ import com.ooyala.pulse.RequestSettings;
 import com.ooyala.pulse.ResponseHeader;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.model.VideoItem;
+import com.ooyala.pulseplayer.utils.HelperMethods;
 
 
 import java.util.ArrayList;
@@ -72,7 +74,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     private Runnable adProgressRunnable;
     private final int AD_PROGRESS_INTERVAL = 200;
 
-    public PulseManagerLive(VideoItem videoItem, PlayerView playerView,Button skipButton, Context context) {
+    public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Button skipButton, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.context = context;
@@ -86,7 +88,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     }
 
     /////////////////////Playback helper////////////////////
-    public void initializePlayer () {
+    public void initializePlayer() {
         exoPlayer = new ExoPlayer.Builder(context).build();
         playerView.setPlayer(exoPlayer);
 
@@ -118,32 +120,32 @@ public class PulseManagerLive implements PulseLiveSessionListener {
             if (midrollBreakIndex < playbackPosition.size()) {
                 Float position = playbackPosition.get(midrollBreakIndex++);
                 PulseLiveAdBreak mAdBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.MIDROLL, position);
-                Toast toast = Toast.makeText(context, "Triggerd getAdBreak for playback position - " + playbackPosition.get(midrollBreakIndex-1), Toast.LENGTH_LONG);
-                toast.show();
+
+                String toastMessage = "Triggerd getAdBreak for playback position - " + playbackPosition.get(midrollBreakIndex - 1);
+                HelperMethods.showCustomTextSizeToast(v.getContext(), toastMessage, 30);
+
                 if (mAdBreak != null) {
                     mAdBreak.getAllLinearAds(this::prepareAdsForPlay);
                     mAdBreaks.add(mAdBreak);
                 }
             } else {
-                Toast toast = Toast.makeText(context, "No more playback position available for current session. Extend session to request for more breaks.", Toast.LENGTH_LONG);
-                toast.show();
+                String toastMessage = "No more playback position available for current session. Extend session to request for more breaks.";
+                HelperMethods.showCustomTextSizeToast(v.getContext(), toastMessage, 30);
             }
 
         });
 
         showAdsBtn.setOnClickListener(v -> {
             if (mAdBreaks != null && !mAdBreaks.isEmpty()) {
-                if (mAdBreaks.get(0).getPlayableAdsTotal()>0) {
+                if (mAdBreaks.get(0).getPlayableAdsTotal() > 0) {
                     exoPlayer.seekToNextMediaItem();
                     mAdBreaks.remove(0); //Remove the currently playing ad break details from the list. If there are no more remaining adbreaks, this if block should not be executed.
                     showAdsBtn.setVisibility(View.INVISIBLE); //Setting it invisible so user cannot start playing following break when previous break is already playing.
                 } else {
-                    Toast toast = Toast.makeText(context, "No ads to show.", Toast.LENGTH_LONG);
-                    toast.show();
+                    HelperMethods.showCustomTextSizeToast(v.getContext(), "No ads to show.", 30);
                 }
             } else {
-                Toast toast = Toast.makeText(context, "No AdBreak available", Toast.LENGTH_LONG);
-                toast.show();
+                HelperMethods.showCustomTextSizeToast(v.getContext(), "No AdBreak available", 30);
             }
         });
 
@@ -155,15 +157,15 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         });
     }
 
-    private void prepareAdsForPlay (List < PulseVideoAd > ads) {
+    private void prepareAdsForPlay(List<PulseVideoAd> ads) {
         if (ads == null || ads.isEmpty()) {
             Log.w("PulseManagerLive", "No ads available.");
             CharSequence text = "Inventory ad returned from Pulse for Preroll position.";
             if (midrollBreakIndex > 0) {
                 text = "Inventory ad returned from Pulse for playback position - " + playbackPosition.get(midrollBreakIndex - 1);
             }
-            Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
-            toast.show();
+
+            HelperMethods.showCustomTextSizeToast(context, String.valueOf(text), 30);
             return;
         }
         int adIndex = 0;
@@ -214,8 +216,8 @@ public class PulseManagerLive implements PulseLiveSessionListener {
                 currentPulseVideoAd = (PulseVideoAd) mediaItem.localConfiguration.tag;
                 currentPulseVideoAd.adStarted();
                 startAdProgressTracking();
-                Toast toast = Toast.makeText(context, mediaItem.mediaMetadata.displayTitle , Toast.LENGTH_LONG);
-                toast.show();
+
+                HelperMethods.showCustomTextSizeToast(context, String.valueOf(mediaItem.mediaMetadata.displayTitle), 30);
 
                 //If this ad is skippable, update the skip button.
                 if (currentPulseVideoAd.isSkippable()) {
@@ -278,7 +280,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     }
 
 
-    private void startAdProgressTracking () {
+    private void startAdProgressTracking() {
         adProgressRunnable = new Runnable() {
             @Override
             public void run() {
@@ -304,7 +306,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         adProgressHandler.post(adProgressRunnable);
     }
 
-    private void stopAdProgressTracking () {
+    private void stopAdProgressTracking() {
         if (adProgressRunnable != null) {
             adProgressHandler.removeCallbacks(adProgressRunnable);
             adProgressRunnable = null;
@@ -312,7 +314,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         }
     }
 
-    public void releasePlayer () {
+    public void releasePlayer() {
         if (exoPlayer != null) {
             exoPlayer.removeListener(playbackListener);
             exoPlayer.release();
@@ -323,7 +325,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         }
     }
 
-    private MediaFile selectAppropriateMediaFile (List < MediaFile > potentialMediaFiles) {
+    private MediaFile selectAppropriateMediaFile(List<MediaFile> potentialMediaFiles) {
         MediaFile selected = null;
         int highestBitrate = 0;
         for (MediaFile file : potentialMediaFiles) {
@@ -342,7 +344,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
      *
      * @return The created {@link RequestSettings}
      */
-    private RequestSettings getRequestSettings () {
+    private RequestSettings getRequestSettings() {
         RequestSettings newRequestSettings = new RequestSettings();
         if (videoItem.getMidrollPositions() != null && videoItem.getMidrollPositions().length != 0) {
             for (int i = 0; i < videoItem.getMidrollPositions().length; i++) {
@@ -358,14 +360,14 @@ public class PulseManagerLive implements PulseLiveSessionListener {
      *
      * @return The created {@link ContentMetadata}.
      */
-    private ContentMetadata getContentMetadata () {
+    private ContentMetadata getContentMetadata() {
         ContentMetadata contentMetadata = new ContentMetadata();
         contentMetadata.setTags(new ArrayList<>(Arrays.asList(videoItem.getTags())));
         return contentMetadata;
     }
 
     /////////////////////Session extension method//////////////////////
-    private void requestSessionExtension () {
+    private void requestSessionExtension() {
         android.util.Log.i(TAG, "Request a session extension for two midrolls at 30s after previous midroll break.");
         RequestSettings updatedRequestSettings = new RequestSettings();
         List<Float> newPlaybackPositions = new ArrayList<>();
@@ -377,12 +379,12 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         //Make a session extension request and instantiate a PulseSessionExtensionListener.
         //The onComplete callback would be called when the session is successfully extended.
         pulseLiveSession.extendSession(getContentMetadata(), updatedRequestSettings, () -> Log.i(TAG, "Session was successfully extended."));
-        Toast toast = Toast.makeText(context, "Session Extended for playback positions - " + newPlaybackPositions, Toast.LENGTH_LONG);
-        toast.show();
+        String toastMessage = "Session Extended for playback positions - " + newPlaybackPositions;
+        HelperMethods.showCustomTextSizeToast(context, toastMessage, 30);
     }
 
     @Override
-    public void getStaggeringValues (ResponseHeader responseHeader){
+    public void getStaggeringValues(ResponseHeader responseHeader) {
         PulseLiveSessionListener.super.getStaggeringValues(responseHeader);
 
         PulseLiveAdBreak pAdBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.PREROLL);
@@ -394,7 +396,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     }
 
     @Override
-    public void illegalOperationOccurred (com.ooyala.pulse.Error error){
+    public void illegalOperationOccurred(com.ooyala.pulse.Error error) {
 
     }
 
