@@ -5,10 +5,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.solver.widgets.Helper;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.PlaybackException;
@@ -16,7 +14,6 @@ import androidx.media3.common.Player;
 import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
-import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.dash.DashMediaSource;
@@ -40,7 +37,6 @@ import com.ooyala.pulse.ResponseHeader;
 import com.ooyala.pulseplayer.R;
 import com.ooyala.pulseplayer.model.VideoItem;
 import com.ooyala.pulseplayer.utils.HelperMethods;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,14 +69,15 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     private Runnable adProgressRunnable;
     private final int AD_PROGRESS_INTERVAL = 200;
 
-    public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Button skipButton, Context context) {
+    public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.context = context;
-        this.fetchNextBreakBtn = (Button) playerView.findViewById(R.id.adBreak);
-        this.showAdsBtn = (Button) playerView.findViewById(R.id.showAds);
-        this.extendSessionBtn = (Button) playerView.findViewById(R.id.extendSession);
-        this.skipBtn = skipButton;
+        fetchNextBreakBtn = (Button) playerView.findViewById(R.id.adBreak);
+        showAdsBtn = (Button) playerView.findViewById(R.id.showAds);
+        extendSessionBtn = (Button) playerView.findViewById(R.id.extendSession);
+        skipBtn = (Button) playerView.findViewById(R.id.skipBtn);
+        skipBtn.setVisibility(View.INVISIBLE);
         // Create and start a pulse session
         pulseLiveSession = Pulse.createLiveSession(getContentMetadata(), getRequestSettings(), this);
         initializePlayer();
@@ -97,17 +94,19 @@ public class PulseManagerLive implements PulseLiveSessionListener {
                 .setReadTimeoutMs(4000)
                 .setUserAgent(userAgent);
 
-        DataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
-
         MediaItem mediaItem = new MediaItem.Builder()
                 .setMediaId(mediaType.CONTENT.getMessage())
                 .setUri(videoItem.getContentUrl())
                 .build();
 
-        // Create a dash media source pointing to a dash manifest uri.
-        mediaSource =
-                new DashMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(mediaItem);
+        if(videoItem.getContentUrl().endsWith(".mpd")) {
+            // Create a dash media source pointing to a dash manifest uri.
+            mediaSource = new DashMediaSource.Factory(httpDataSourceFactory)
+                    .createMediaSource(mediaItem);
+        } else {
+            mediaSource = new ProgressiveMediaSource.Factory(httpDataSourceFactory)
+                    .createMediaSource(mediaItem);
+        }
 
         exoPlayer.setMediaSource(mediaSource);
         exoPlayer.prepare();
@@ -197,7 +196,6 @@ public class PulseManagerLive implements PulseLiveSessionListener {
             } else {
                 Log.d(TAG, String.format("%d ads are added for preroll or postroll adBreak.", adIndex));
                 exoPlayer.seekToNextMediaItem();
-                exoPlayer.setPlayWhenReady(true);
             }
             exoPlayer.addMediaSource(mediaSource); //Add content Media in the list to play after ad playback.
         }
@@ -218,7 +216,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
                 startAdProgressTracking();
                 showAdsBtn.setVisibility(View.INVISIBLE);
 
-                HelperMethods.showCustomTextSizeToast(context, String.valueOf(mediaItem.mediaMetadata.displayTitle), 30);
+                HelperMethods.showCustomTextSizeToast(context, "Playing " + String.valueOf(mediaItem.mediaMetadata.displayTitle), 30);
 
                 //If this ad is skippable, update the skip button.
                 if (currentPulseVideoAd.isSkippable()) {
@@ -258,7 +256,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
             if (skipBtn.getVisibility() == View.VISIBLE) {
                 int remainingTime = (int) (currentPulseVideoAd.getSkipOffset() - currentAdPlayhead);
                 String skipBtnText = "Skip ad in ";
-                skipBtn.setText(String.format("%s%s", skipBtnText, remainingTime));
+                skipBtn.setText(String.format("%s%ss", skipBtnText, remainingTime));
             }
             if ((currentPulseVideoAd.getSkipOffset() <= (currentAdPlayhead))) {
                 skipBtn.setText(R.string.skip_ad);
@@ -392,6 +390,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         if (pAdBreak != null) {
             pAdBreak.getAllLinearAds(this::prepareAdsForPlay);
         }
+        exoPlayer.setPlayWhenReady(true);
     }
 
     @Override

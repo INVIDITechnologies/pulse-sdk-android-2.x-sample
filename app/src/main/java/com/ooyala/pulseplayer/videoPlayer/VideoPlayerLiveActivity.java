@@ -42,10 +42,7 @@ import com.ooyala.pulseplayer.model.VideoItem;
         }
         //Get the selected videoItem from the bundled information.
         final VideoItem videoItem = getSelectedVideoItem();
-        skipButton = (Button) findViewById(R.id.skipBtn);
-        skipButton.setVisibility(View.INVISIBLE);
         playerView = findViewById(R.id.exoPlayerView);
-
         playerView.showController();
         playerView.setControllerShowTimeoutMs(-1);
         uiMode = (UiModeManager) getSystemService(UI_MODE_SERVICE);
@@ -61,7 +58,7 @@ import com.ooyala.pulseplayer.model.VideoItem;
         }
 
         //Instantiate Pulse manager with selected data.
-        pulseManagerLive = new PulseManagerLive(videoItem, playerView,skipButton,this);
+        pulseManagerLive = new PulseManagerLive(videoItem, playerView,this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
 
