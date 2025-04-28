@@ -23,9 +23,9 @@
   "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd",
   "test-description": "Pre/Mid/Post all breaks will be returned. If extend Session button is clicked, it will extend the session for 2 midroll breaks at positions 30s and 60s later from last midroll break position"
 },{
-  "tags":              ["vast2","vast6"],
-  "content-title":     "2ThirdPartyMidrolls-noPreroll",
+  "tags":              ["vast2","vast6","vast-wrapper"],
+  "content-title":     "Pre/Mid/Post-rolls-thirdPartyAds",
   "midroll-positions": [10,40],
   "content-url":       "https://c75a7e79204e539d.mediapackage.us-east-1.amazonaws.com/out/v1/efd9f04959f846eab93e7cb1a63a28eb/index.mpd",
-  "test-description": ""
+  "test-description": "Pre/Mid/Post all breaks will be returned. If extend Session button is clicked, it will extend the session for 2 midroll breaks at positions 30s and 60s later from last midroll break position"
 }]

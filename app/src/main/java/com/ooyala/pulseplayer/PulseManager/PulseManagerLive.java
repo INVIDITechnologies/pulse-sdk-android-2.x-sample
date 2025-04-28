@@ -1,6 +1,5 @@
 package com.ooyala.pulseplayer.PulseManager;
 
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -52,7 +51,7 @@ import java.util.List;
 public class PulseManagerLive implements PulseLiveSessionListener {
 
     private PulseLiveSession pulseLiveSession;
-    private Button triggerAdBreakBtn;
+    private Button fetchNextBreakBtn;
     private Button showAdsBtn;
     private Button extendSessionBtn;
     private Button skipBtn;
@@ -78,7 +77,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.context = context;
-        this.triggerAdBreakBtn = (Button) playerView.findViewById(R.id.adBreak);
+        this.fetchNextBreakBtn = (Button) playerView.findViewById(R.id.adBreak);
         this.showAdsBtn = (Button) playerView.findViewById(R.id.showAds);
         this.extendSessionBtn = (Button) playerView.findViewById(R.id.extendSession);
         this.skipBtn = skipButton;
@@ -116,7 +115,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         exoPlayer.addListener(playbackListener);
         exoPlayer.setPlayWhenReady(false);
 
-        triggerAdBreakBtn.setOnClickListener(v -> {
+        fetchNextBreakBtn.setOnClickListener(v -> {
             if (midrollBreakIndex < playbackPosition.size()) {
                 Float position = playbackPosition.get(midrollBreakIndex++);
                 PulseLiveAdBreak mAdBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.MIDROLL, position);
@@ -140,7 +139,6 @@ public class PulseManagerLive implements PulseLiveSessionListener {
                 if (mAdBreaks.get(0).getPlayableAdsTotal() > 0) {
                     exoPlayer.seekToNextMediaItem();
                     mAdBreaks.remove(0); //Remove the currently playing ad break details from the list. If there are no more remaining adbreaks, this if block should not be executed.
-                    showAdsBtn.setVisibility(View.INVISIBLE); //Setting it invisible so user cannot start playing following break when previous break is already playing.
                 } else {
                     HelperMethods.showCustomTextSizeToast(v.getContext(), "No ads to show.", 30);
                 }
@@ -172,9 +170,9 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         for (PulseVideoAd ad : ads) {
             MediaFile mediaFile = selectAppropriateMediaFile(ad.getMediaFiles());
             if (mediaFile != null) {
-                CharSequence displayTitle = "Playing ads for Preroll Break";
+                CharSequence displayTitle = "ads for Preroll Break";
                 if (midrollBreakIndex > 0) {
-                    displayTitle = "Playing ads for playback position: " + playbackPosition.get(midrollBreakIndex - 1);
+                    displayTitle = "ads for playback position: " + playbackPosition.get(midrollBreakIndex - 1);
                 }
                 MediaMetadata mediaMetadata = new MediaMetadata
                         .Builder()
@@ -195,11 +193,13 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         }
         if (adIndex > 0) {
             if (midrollBreakIndex > 0) {
-                Log.d(TAG, String.format("%d ads are added for adBreak %d", adIndex, midrollBreakIndex));
+                Log.d(TAG, String.format("%d ads are added for adBreak %d at playback position %f", adIndex, midrollBreakIndex, playbackPosition.get(midrollBreakIndex-1)));
             } else {
                 Log.d(TAG, String.format("%d ads are added for preroll or postroll adBreak.", adIndex));
+                exoPlayer.seekToNextMediaItem();
+                exoPlayer.setPlayWhenReady(true);
             }
-            exoPlayer.addMediaSource(mediaSource);
+            exoPlayer.addMediaSource(mediaSource); //Add content Media in the list to play after ad playback.
         }
     }
 
@@ -216,6 +216,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
                 currentPulseVideoAd = (PulseVideoAd) mediaItem.localConfiguration.tag;
                 currentPulseVideoAd.adStarted();
                 startAdProgressTracking();
+                showAdsBtn.setVisibility(View.INVISIBLE);
 
                 HelperMethods.showCustomTextSizeToast(context, String.valueOf(mediaItem.mediaMetadata.displayTitle), 30);
 
@@ -390,9 +391,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         PulseLiveAdBreak pAdBreak = pulseLiveSession.getAdBreak(RequestSettings.AdBreakType.PREROLL);
         if (pAdBreak != null) {
             pAdBreak.getAllLinearAds(this::prepareAdsForPlay);
-            exoPlayer.seekToNextMediaItem();
         }
-        exoPlayer.setPlayWhenReady(true);
     }
 
     @Override
@@ -408,7 +407,6 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         mediaType(String s) {
             this.message = s;
         }
-
         public String getMessage() {
             return message;
         }

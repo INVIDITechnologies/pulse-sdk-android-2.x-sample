@@ -4,7 +4,7 @@
     <string name="resource_notfound">Video library not found</string>
     <string name="title_activity_video_player">VideoPlayerActivity</string>
     <string name="skip_ad_remaining_time">Skip ad in  </string>
-    <string name="check_for_ad_break">Trigger midroll break</string>
+    <string name="check_for_ad_break">Prepare Ads For Next break</string>
     <string name="show_ads">Play Ads</string>
     <string name="extend_session">Extend Session</string>
     <string name="skip_ad">Skip Ad</string>
