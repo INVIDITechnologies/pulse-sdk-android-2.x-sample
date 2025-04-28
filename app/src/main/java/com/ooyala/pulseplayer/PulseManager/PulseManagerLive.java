@@ -53,6 +53,8 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     private Button triggerAdBreakBtn;
     private Button showAdsBtn;
     private Button extendSessionBtn;
+    private Button skipBtn;
+    private boolean skipEnabled = false;
     private PlayerView playerView;
     private ExoPlayer exoPlayer;
     private Context context;
@@ -70,13 +72,14 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     private Runnable adProgressRunnable;
     private final int AD_PROGRESS_INTERVAL = 200;
 
-    public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Context context) {
+    public PulseManagerLive(VideoItem videoItem, PlayerView playerView,Button skipButton, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.context = context;
         this.triggerAdBreakBtn = (Button) playerView.findViewById(R.id.adBreak);
         this.showAdsBtn = (Button) playerView.findViewById(R.id.showAds);
         this.extendSessionBtn = (Button) playerView.findViewById(R.id.extendSession);
+        this.skipBtn = skipButton;
         // Create and start a pulse session
         pulseLiveSession = Pulse.createLiveSession(getContentMetadata(), getRequestSettings(), this);
         initializePlayer();
@@ -202,16 +205,23 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         @Override
         public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
 
-            if (currentPulseVideoAd != null) {
+            if (currentPulseVideoAd != null && !skipEnabled) {
                 currentPulseVideoAd.adFinished();
             }
             if (mediaItem != null && mediaItem.mediaId.equals(mediaType.AD.getMessage())) {
                 Log.d(TAG, "onMediaItemTransition - reason: Ad playback Started");
+                skipEnabled = false;
                 currentPulseVideoAd = (PulseVideoAd) mediaItem.localConfiguration.tag;
                 currentPulseVideoAd.adStarted();
                 startAdProgressTracking();
                 Toast toast = Toast.makeText(context, mediaItem.mediaMetadata.displayTitle , Toast.LENGTH_LONG);
                 toast.show();
+
+                //If this ad is skippable, update the skip button.
+                if (currentPulseVideoAd.isSkippable()) {
+                    skipBtn.setVisibility(View.VISIBLE);
+                    updateSkipButton(0);
+                }
 
             } else {
                 Log.d(TAG, "onMediaItemTransition - reason: Content Started/Resumed");
@@ -235,6 +245,39 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         }
     };
 
+    /**
+     * A helper method to update the ad skip button.
+     *
+     * @param currentAdPlayhead the ad playback progress.
+     */
+    private void updateSkipButton(int currentAdPlayhead) {
+        if (currentPulseVideoAd.isSkippable() && !skipEnabled) {
+            if (skipBtn.getVisibility() == View.VISIBLE) {
+                int remainingTime = (int) (currentPulseVideoAd.getSkipOffset() - currentAdPlayhead);
+                String skipBtnText = "Skip ad in ";
+                skipBtn.setText(String.format("%s%s", skipBtnText, remainingTime));
+            }
+            if ((currentPulseVideoAd.getSkipOffset() <= (currentAdPlayhead))) {
+                skipBtn.setText(R.string.skip_ad);
+                skipEnabled = true;
+                skipBtn.setOnClickListener(v -> {
+                    skipBtn.setOnClickListener(null);
+                    skipBtn.setVisibility(View.INVISIBLE);
+
+                    currentPulseVideoAd.adSkipped();
+                    Log.d(TAG, "onMediaItemTransition - reason: Ad skipped by user");
+                    stopAdProgressTracking();
+
+                    // Move to next media
+                    if (exoPlayer.hasNextMediaItem()) {
+                        exoPlayer.seekToNextMediaItem();
+                    }
+                });
+            }
+        }
+    }
+
+
     private void startAdProgressTracking () {
         adProgressRunnable = new Runnable() {
             @Override
@@ -251,6 +294,8 @@ public class PulseManagerLive implements PulseLiveSessionListener {
 
                 float progress = (float) currentMediaPlaybackPosition / 1000;
                 currentPulseVideoAd.adPositionChanged(progress);
+
+                updateSkipButton((int) progress);
 
                 Log.d(TAG, "Ad Progress: " + progress);
                 adProgressHandler.postDelayed(this, AD_PROGRESS_INTERVAL);

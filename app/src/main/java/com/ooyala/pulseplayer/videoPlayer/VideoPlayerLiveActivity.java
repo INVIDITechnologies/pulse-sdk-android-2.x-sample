@@ -61,7 +61,7 @@ import com.ooyala.pulseplayer.model.VideoItem;
         }
 
         //Instantiate Pulse manager with selected data.
-        pulseManagerLive = new PulseManagerLive(videoItem, playerView,this);
+        pulseManagerLive = new PulseManagerLive(videoItem, playerView,skipButton,this);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
 
