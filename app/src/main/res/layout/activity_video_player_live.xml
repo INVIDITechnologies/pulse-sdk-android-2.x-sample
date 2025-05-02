@@ -5,17 +5,7 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-
-    <RelativeLayout
-        android:id="@+id/playerLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_weight="8"
-        android:orientation="vertical">
-
-
-        <androidx.media3.ui.PlayerView
+    <androidx.media3.ui.PlayerView
             android:id="@+id/exoPlayerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -25,20 +15,36 @@
             app:controller_layout_id="@layout/exo_player_control_view">
             
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/skipBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="10dp"
+                    android:alpha="0.5"
+                    android:color="#66FF0000"
+                    android:textSize="32sp"
+                    android:text="@string/skip_ad_remaining_time" />
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                 <Button
                     android:id="@+id/adBreak"
                     android:layout_width="wrap_content"
                     android:layout_height="109dp"
-                    android:layout_alignParentStart="true"
                     android:layout_marginEnd="10dp"
                     android:alpha="0.5"
                     android:color="#66FF0000"
                     android:text="@string/check_for_ad_break"
-                    android:textSize="32dp" />
+                    android:textSize="32sp" />
 
                 <Button
                     android:id="@+id/showAds"
@@ -47,7 +53,7 @@
                     android:layout_marginEnd="10dp"
                     android:alpha="0.5"
                     android:color="#66FF0000"
-                    android:textSize="32dp"
+                    android:textSize="32sp"
                     android:text="@string/show_ads" />
 
                 <Button
@@ -57,45 +63,13 @@
                     android:layout_marginEnd="10dp"
                     android:alpha="0.5"
                     android:color="#66FF0000"
-                    android:textSize="32dp"
+                    android:textSize="32sp"
                     android:text="@string/extend_session" />
+                </LinearLayout>
+
             </LinearLayout>
 
-            <Button
-                android:id="@+id/skipBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_gravity="right"
-                android:layout_marginEnd="10dp"
-                android:alpha="0.5"
-                android:color="#66FF0000"
-                android:textSize="32dp"
-                android:text="@string/skip_ad_remaining_time" />
         </androidx.media3.ui.PlayerView>
 
-        <ImageView
-            android:id="@+id/nextAdThumbnail"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="100dp"
-            android:visibility="gone" />
-
-        <com.ooyala.pulseplayer.videoPlayer.CustomImageView
-            android:id="@+id/pauseAdLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center"
-            android:alpha="0.8"
-            android:background="#ffffff"
-            android:visibility="invisible" />
-
-    </RelativeLayout>
 </LinearLayout>
 
