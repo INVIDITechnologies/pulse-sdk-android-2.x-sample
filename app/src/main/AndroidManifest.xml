@@ -48,7 +48,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".videoPlayer.VideoPlayerActivity"
+            android:name=".videoPlayer.VideoPlayerVODActivity"
+            android:label="@string/title_activity_exo_video_player"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|screenSize"></activity>
+        <activity
+            android:name=".videoPlayer.VideoPlayerLiveActivity"
             android:label="@string/title_activity_exo_video_player"
             android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="orientation|screenSize"></activity>

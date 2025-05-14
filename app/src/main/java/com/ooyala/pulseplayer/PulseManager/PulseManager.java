@@ -13,17 +13,17 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
-import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.Util;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.ExoPlaybackException;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.MediaSource;
+import androidx.media3.exoplayer.source.ProgressiveMediaSource;
+import androidx.media3.ui.PlayerView;
+
 import com.ooyala.pulse.ContentMetadata;
 import com.ooyala.pulse.Error;
 import com.ooyala.pulse.FriendlyObstruction;
@@ -57,7 +57,7 @@ public class PulseManager implements PulseSessionListener {
     private PlayerView playerView;
     private View adView;
     private ImageView nextAdThumbnail;
-    private SimpleExoPlayer exoPlayerInstance;
+    private ExoPlayer exoPlayerInstance;
     private MediaSource mediaSource;
     private MediaSource nextAdMediaSource;
     private Button skipBtn;
@@ -483,7 +483,7 @@ public class PulseManager implements PulseSessionListener {
     public void initializePlayer() {
         //Get the selected videoItem from the bundled information.
         if (exoPlayerInstance == null) {
-            exoPlayerInstance = ExoPlayerFactory.newSimpleInstance(context);
+            exoPlayerInstance = new ExoPlayer.Builder(context).build();
         }
         exoPlayerInstance.addListener(playbackStateListener);
         exoPlayerInstance.setPlayWhenReady(playWhenReady);
@@ -542,18 +542,16 @@ public class PulseManager implements PulseSessionListener {
         String userAgent = Util.getUserAgent(context, context.getString(R.string.app_name));
 
         // Default parameters, except allowCrossProtocolRedirects is true
-        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
-                userAgent,
-                null /* listener */,
-                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
-                true /* allowCrossProtocolRedirects */
-        );
+        DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS)
+                .setUserAgent(userAgent);
 
-        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
+        MediaItem mediaItem = new MediaItem.Builder()
+                .setUri(Uri.parse(uri))
+                .build();
 
-        return new ExtractorMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(Uri.parse(uri));
+        return new ProgressiveMediaSource.Factory(httpDataSourceFactory)
+                    .createMediaSource(mediaItem);
     }
 
     /**
@@ -905,7 +903,7 @@ public class PulseManager implements PulseSessionListener {
         });
     }
 
-    class ExoPlayerEventListener implements Player.EventListener {
+    class ExoPlayerEventListener implements Player.Listener {
 
         private final String TAG = ExoPlayerEventListener.class.getName();
 
@@ -980,17 +978,17 @@ public class PulseManager implements PulseSessionListener {
                     stateString = "UNKNOWN_STATE             -";
                     break;
             }
-            com.google.android.exoplayer2.util.Log.d(TAG, "changed state to " + stateString
+            Log.d(TAG, "changed state to " + stateString
                     + " playWhenReady: " + playWhenReady);
         }
 
         @Override
-        public void onPlayerError(ExoPlaybackException error) {
+        public void onPlayerError(PlaybackException error) {
             final String what;
             Log.e(TAG, error.getMessage() == null ? "" : error.getMessage());
-            switch (error.type) {
+            what = error.getLocalizedMessage();
+            switch (error.errorCode) {
                 case ExoPlaybackException.TYPE_SOURCE:
-                    what = error.getSourceException().getMessage();
                     Log.e(TAG, "TYPE_SOURCE: " + what);
                     if (playAd) {
                         currentPulseVideoAd.adFailed(PulseAdError.REQUEST_FAILED);
@@ -1000,7 +998,6 @@ public class PulseManager implements PulseSessionListener {
                     break;
 
                 case ExoPlaybackException.TYPE_RENDERER:
-                    what = error.getRendererException().getMessage();
                     Log.e(TAG, "TYPE_RENDERER: " + what);
                     if (playAd) {
                         currentPulseVideoAd.adFailed(PulseAdError.REQUEST_TIMED_OUT);
@@ -1010,7 +1007,6 @@ public class PulseManager implements PulseSessionListener {
                     break;
 
                 case ExoPlaybackException.TYPE_UNEXPECTED:
-                    what = error.getUnexpectedException().getMessage();
                     Log.e(TAG, "TYPE_UNEXPECTED: " + what);
                     if (playAd) {
                         currentPulseVideoAd.adFailed(PulseAdError.COULD_NOT_PLAY);

@@ -7,19 +7,16 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.UiModeManager;
-import android.content.res.Configuration;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.media3.ui.PlayerControlView;
+import androidx.media3.ui.PlayerView;
 
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
-import com.google.android.exoplayer2.ui.PlayerControlView;
-import com.google.android.exoplayer2.ui.PlayerView;
 
 import com.ooyala.pulse.FriendlyObstruction;
 import com.ooyala.pulse.PulseVideoAd;
@@ -35,7 +32,7 @@ import java.util.List;
 /**
  * An activity for playing ad video and content. This activity employs a PulseManager instance to manage the Pulse session.
  */
-public class VideoPlayerActivity extends AppCompatActivity {
+public class VideoPlayerVODActivity extends AppCompatActivity {
     static final int OPEN_BROWSER_REQUEST = 1365;
     public static PulseManager pulseManager;
     private PlayerView playerView;
@@ -47,7 +44,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private ImageView nextAdThumbnail;
     List<FriendlyObstruction> friendlyObs = new ArrayList<>();
     private boolean mExoPlayerFullscreen = false;
-    private static final String TAG = VideoPlayerActivity.class.getName();
+    private static final String TAG = VideoPlayerVODActivity.class.getName();
     private   UiModeManager uiMode;
 
     @Override
@@ -175,7 +172,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         if (mExoPlayerFullscreen) {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
             mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, com.google.android.exoplayer2.ui.R.drawable.exo_controls_fullscreen_exit));
+            mFullScreenIcon.setImageDrawable(getDrawable(R.drawable.exit_full_screen));
             mFullScreenDialog.show();
         }
  //       pulseManager.setCallBackHandler(PulseManager.contentProgressHandler);
@@ -212,7 +209,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         ((ViewGroup) playerView.getParent()).removeView(playerView);
         mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, com.google.android.exoplayer2.ui.R.drawable.exo_controls_fullscreen_exit));
+        mFullScreenIcon.setImageDrawable(getDrawable(R.drawable.exit_full_screen));
         mExoPlayerFullscreen = true;
         mFullScreenDialog.show();
         // In order to test removeAllFriendlyObstructions, call below method to unregistered friendly obstructions after entering into fullScreen.
@@ -230,7 +227,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         ((FrameLayout) findViewById(R.id.main_media_frame)).addView(playerView);
         mExoPlayerFullscreen = false;
         mFullScreenDialog.dismiss();
-        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(this, com.google.android.exoplayer2.ui.R.drawable.exo_controls_fullscreen_exit));
+        mFullScreenIcon.setImageDrawable(getDrawable(R.drawable.exit_full_screen));
         pulseManager.sendExitFullScreenEvent();
     }
 
