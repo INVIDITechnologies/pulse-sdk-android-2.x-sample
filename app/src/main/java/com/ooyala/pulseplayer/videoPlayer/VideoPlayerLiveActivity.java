@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +23,11 @@ import com.ooyala.pulseplayer.model.VideoItem;
     public static PulseManagerLive pulseManagerLive;
     private PlayerView playerView;
     private Button skipButton;
+    private Button fetchNextBreakBtn;
+    private Button showAdsBtn;
+    private Button extendSessionBtn;
+    private ImageButton exoPlayBtn;
+    private ImageButton exoPauseBtn;
     private UiModeManager uiMode;
 
     @OptIn(markerClass = UnstableApi.class)
@@ -43,6 +49,15 @@ import com.ooyala.pulseplayer.model.VideoItem;
         //Get the selected videoItem from the bundled information.
         final VideoItem videoItem = getSelectedVideoItem();
         playerView = findViewById(R.id.exoPlayerView);
+
+        skipButton = findViewById(R.id.skipBtn);
+        fetchNextBreakBtn = findViewById(R.id.adBreak);
+        showAdsBtn = findViewById(R.id.showAds);
+        extendSessionBtn = findViewById(R.id.extendSession);
+        exoPlayBtn = findViewById(R.id.exo_play);
+        exoPauseBtn = findViewById(R.id.exo_pause);
+
+
         playerView.showController();
         playerView.setControllerShowTimeoutMs(-1);
         uiMode = (UiModeManager) getSystemService(UI_MODE_SERVICE);
@@ -58,7 +73,7 @@ import com.ooyala.pulseplayer.model.VideoItem;
         }
 
         //Instantiate Pulse manager with selected data.
-        pulseManagerLive = new PulseManagerLive(videoItem, playerView,this);
+        pulseManagerLive = new PulseManagerLive(videoItem, playerView,this, skipButton, fetchNextBreakBtn, showAdsBtn, extendSessionBtn, exoPlayBtn, exoPauseBtn);
 
         //Assign a clickThroughCallback to manage opening the browser when an Ad is clicked.
 

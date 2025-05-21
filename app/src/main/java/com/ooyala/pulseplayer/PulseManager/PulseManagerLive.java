@@ -73,10 +73,16 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     private Runnable adProgressRunnable;
     private final int AD_PROGRESS_INTERVAL = 1000;
 
-    public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Context context) {
+    public PulseManagerLive(VideoItem videoItem, PlayerView playerView, Context context, Button skipBtn, Button fetchNextBreakBtn, Button showAdsBtn, Button extendSessionBtn, ImageButton exoPlayBtn, ImageButton exoPauseBtn) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.context = context;
+        this.skipBtn = skipBtn;
+        this.fetchNextBreakBtn = fetchNextBreakBtn;
+        this.showAdsBtn = showAdsBtn;
+        this.extendSessionBtn = extendSessionBtn;
+        this.exoPlayBtn = exoPlayBtn;
+        this.exoPauseBtn = exoPauseBtn;
         bindViews();
         setupSessionAndPlayer();
     }
@@ -88,13 +94,7 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     }
 
     private void bindViews() {
-        fetchNextBreakBtn = playerView.findViewById(R.id.adBreak);
-        showAdsBtn = playerView.findViewById(R.id.showAds);
-        extendSessionBtn = playerView.findViewById(R.id.extendSession);
-        skipBtn = playerView.findViewById(R.id.skipBtn);
         skipBtn.setVisibility(View.INVISIBLE);
-        exoPlayBtn = playerView.findViewById(R.id.exo_play);
-        exoPauseBtn = playerView.findViewById(R.id.exo_pause);
     }
 
     /////////////////////Playback helper////////////////////
