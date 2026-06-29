@@ -42,8 +42,10 @@ import com.ooyala.pulseplayer.utils.HelperMethods;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @UnstableApi
 public class PulseManagerLive implements PulseLiveSessionListener {
@@ -410,6 +412,10 @@ public class PulseManagerLive implements PulseLiveSessionListener {
     private ContentMetadata getContentMetadata() {
         ContentMetadata contentMetadata = new ContentMetadata();
         contentMetadata.setTags(new ArrayList<>(Arrays.asList(videoItem.getTags())));
+        Map<String, String> acp = new HashMap<>();
+        acp.put("key1", "value1");
+        acp.put("key2", "value2");
+        contentMetadata.setAccountCustomParameters(acp);
         return contentMetadata;
     }
 

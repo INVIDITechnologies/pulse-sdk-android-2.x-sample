@@ -13,13 +13,16 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
+import androidx.annotation.OptIn;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.ExoPlaybackException;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.ui.PlayerView;
@@ -50,8 +53,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class PulseManager implements PulseSessionListener {
+@UnstableApi public class PulseManager implements PulseSessionListener {
 
     private PulseSession pulseSession;
     private PlayerView playerView;
@@ -93,7 +97,7 @@ public class PulseManager implements PulseSessionListener {
     private static final String TAG = "Pulse Demo Player";
 
 
-    public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, ImageView nextAdThumbnail, List<FriendlyObstruction> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
+    @OptIn(markerClass = UnstableApi.class) public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, ImageView nextAdThumbnail, List<FriendlyObstruction> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.skipBtn = skipButton;
@@ -141,7 +145,7 @@ public class PulseManager implements PulseSessionListener {
         return pulseManager;
     }
 
-    @Override
+    @OptIn(markerClass = UnstableApi.class) @Override
     public void startContentPlayback() {
         //Setup video player for content playback.
         if (!duringPause) {
@@ -160,6 +164,7 @@ public class PulseManager implements PulseSessionListener {
     @Override
     public void startAdPlayback(PulseVideoAd pulseVideoAd, float timeout) {
         currentPulseVideoAd = pulseVideoAd;
+        currentPulseVideoAd.getDuration();
         if ("omsdk".equals(videoItem.getContentId())) {
             if ("OM AdVerification with skipAd as Friendly Obstruction".equals(videoItem.getContentTitle()) || "OMSDK Certification - skipAd as friendly obstruction".equals(videoItem.getContentTitle())) {
                 OmidAdSession.createOmidAdSession(currentPulseVideoAd, context, adView, "invidi.pulseplayer.com", friendlyObs);
@@ -172,7 +177,7 @@ public class PulseManager implements PulseSessionListener {
         showCompanionAds(pulseVideoAd);
     }
 
-    @Override
+    @OptIn(markerClass = UnstableApi.class) @Override
     public void preloadNextAd(PulseVideoAd ad) {
         MediaFile mediaFile = selectAppropriateMediaFile(ad.getMediaFiles());
         if (mediaFile != null) {
@@ -441,6 +446,7 @@ public class PulseManager implements PulseSessionListener {
         newRequestSettings.setStartAdTimeout(500000000);
         newRequestSettings.setThirdPartyTimeout(200000000);
         newRequestSettings.setTotalPassbackTimeout(300000000);
+        newRequestSettings.setMaxLinearBreakDuration(15);
         return newRequestSettings;
     }
 
@@ -454,6 +460,11 @@ public class PulseManager implements PulseSessionListener {
         contentMetadata.setContentProviderInformation("pcode", "embed");
         contentMetadata.setTags(new ArrayList<>(Arrays.asList(videoItem.getTags())));
         contentMetadata.setCategory(videoItem.getCategory());
+        Map<String, String> acp = new HashMap<>();
+        acp.put("acpKey1", "acpValue1");
+        acp.put("acpKey2","acpValue2");
+        acp.put("network", "Live");
+        contentMetadata.setAccountCustomParameters(acp);
         return contentMetadata;
     }
 
@@ -470,9 +481,16 @@ public class PulseManager implements PulseSessionListener {
         MediaFile selected = null;
         int highestBitrate = 0;
         for (MediaFile file : potentialMediaFiles) {
-            if (file.getBitRate() > highestBitrate) {
-                highestBitrate = file.getBitRate();
-                selected = file;
+            if (videoItem.getContentUrl().endsWith(".m3u8")) {
+                if (file.getURI().toString().endsWith(".m3u8")) {
+                    selected = file;
+                    return selected;
+                }
+            } else {
+                if (file.getBitRate() > highestBitrate) {
+                    highestBitrate = file.getBitRate();
+                    selected = file;
+                }
             }
         }
         return selected;
@@ -480,11 +498,11 @@ public class PulseManager implements PulseSessionListener {
 
     /////////////////////Playback helper////////////////////
 
-    public void initializePlayer() {
+    @OptIn(markerClass = UnstableApi.class) public void initializePlayer() {
         //Get the selected videoItem from the bundled information.
-        if (exoPlayerInstance == null) {
-            exoPlayerInstance = new ExoPlayer.Builder(context).build();
-        }
+            if (exoPlayerInstance == null) {
+                exoPlayerInstance = new ExoPlayer.Builder(context).build();
+            }
         exoPlayerInstance.addListener(playbackStateListener);
         exoPlayerInstance.setPlayWhenReady(playWhenReady);
         if (playAd) {
@@ -512,7 +530,7 @@ public class PulseManager implements PulseSessionListener {
         });
     }
 
-    public void releasePlayer() {
+    @OptIn(markerClass = UnstableApi.class) public void releasePlayer() {
         if (exoPlayerInstance != null) {
             playWhenReady = exoPlayerInstance.getPlayWhenReady();
             playbackPosition = exoPlayerInstance.getCurrentPosition();
@@ -535,7 +553,7 @@ public class PulseManager implements PulseSessionListener {
         }
     }
 
-    private MediaSource buildMediaSource(String uri) {
+    @UnstableApi private MediaSource buildMediaSource(String uri) {
         // This is the MediaSource representing the media to be played.
         // Getting media from raw resource
 
@@ -550,14 +568,19 @@ public class PulseManager implements PulseSessionListener {
                 .setUri(Uri.parse(uri))
                 .build();
 
-        return new ProgressiveMediaSource.Factory(httpDataSourceFactory)
+        if (uri.endsWith(".m3u8")) {
+            return new HlsMediaSource.Factory(httpDataSourceFactory)
                     .createMediaSource(mediaItem);
+        } else {
+            return new ProgressiveMediaSource.Factory(httpDataSourceFactory)
+                    .createMediaSource(mediaItem);
+        }
     }
 
     /**
      * Play/resume the selected video content.
      */
-    private void playVideoContent() {
+    @UnstableApi private void playVideoContent() {
         playVideoContent = true;
         mediaSource = buildMediaSource(videoItem.getContentUrl());
         initializePlayer();
@@ -569,7 +592,7 @@ public class PulseManager implements PulseSessionListener {
      * @param timeout      The timeout for ad playback.
      * @param pulseVideoAd The ad video.
      */
-    private void playAdContent(float timeout, final PulseVideoAd pulseVideoAd) {
+    @OptIn(markerClass = UnstableApi.class) private void playAdContent(float timeout, final PulseVideoAd pulseVideoAd) {
         //Configure a handler to monitor playback timeout.
         playbackHandler.postDelayed(playbackRunnable, (long) (timeout * 1000));
         if (nextAdPreloaded == true && nextAdMediaSource != null) {
@@ -597,7 +620,7 @@ public class PulseManager implements PulseSessionListener {
     }
 
     ////////////////////click through related methods///////////
-    public void returnFromClickThrough() {
+    @OptIn(markerClass = UnstableApi.class) public void returnFromClickThrough() {
         playerView.showController();
         if (companionClicked) {
             if (duringAd) {
@@ -903,7 +926,7 @@ public class PulseManager implements PulseSessionListener {
         });
     }
 
-    class ExoPlayerEventListener implements Player.Listener {
+    @UnstableApi class ExoPlayerEventListener implements Player.Listener {
 
         private final String TAG = ExoPlayerEventListener.class.getName();
 
@@ -982,7 +1005,7 @@ public class PulseManager implements PulseSessionListener {
                     + " playWhenReady: " + playWhenReady);
         }
 
-        @Override
+        @OptIn(markerClass = UnstableApi.class) @Override
         public void onPlayerError(PlaybackException error) {
             final String what;
             Log.e(TAG, error.getMessage() == null ? "" : error.getMessage());
