@@ -16,10 +16,12 @@ import android.widget.SeekBar;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.ExoPlaybackException;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.ui.PlayerView;
@@ -51,7 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class PulseManager implements PulseSessionListener {
+@UnstableApi public class PulseManager implements PulseSessionListener {
 
     private PulseSession pulseSession;
     private PlayerView playerView;
@@ -93,7 +95,7 @@ public class PulseManager implements PulseSessionListener {
     private static final String TAG = "Pulse Demo Player";
 
 
-    public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, ImageView nextAdThumbnail, List<FriendlyObstruction> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
+    @UnstableApi public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, ImageView nextAdThumbnail, List<FriendlyObstruction> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.skipBtn = skipButton;
@@ -535,7 +537,7 @@ public class PulseManager implements PulseSessionListener {
         }
     }
 
-    private MediaSource buildMediaSource(String uri) {
+    @UnstableApi private MediaSource buildMediaSource(String uri) {
         // This is the MediaSource representing the media to be played.
         // Getting media from raw resource
 
@@ -550,14 +552,19 @@ public class PulseManager implements PulseSessionListener {
                 .setUri(Uri.parse(uri))
                 .build();
 
-        return new ProgressiveMediaSource.Factory(httpDataSourceFactory)
+        if (uri.endsWith(".m3u8")) {
+            return new HlsMediaSource.Factory(httpDataSourceFactory)
                     .createMediaSource(mediaItem);
+        } else {
+            return new ProgressiveMediaSource.Factory(httpDataSourceFactory)
+                    .createMediaSource(mediaItem);
+        }
     }
 
     /**
      * Play/resume the selected video content.
      */
-    private void playVideoContent() {
+    @UnstableApi private void playVideoContent() {
         playVideoContent = true;
         mediaSource = buildMediaSource(videoItem.getContentUrl());
         initializePlayer();
