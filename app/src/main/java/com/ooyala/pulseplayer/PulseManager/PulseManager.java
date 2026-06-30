@@ -95,7 +95,7 @@ import java.util.List;
     private static final String TAG = "Pulse Demo Player";
 
 
-    @UnstableApi public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, ImageView nextAdThumbnail, List<FriendlyObstruction> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
+    public PulseManager(VideoItem videoItem, PlayerView playerView, View adView, ImageView nextAdThumbnail, List<FriendlyObstruction> friendlyObs, Button skipButton, CustomImageView imageView, CustomCompanionBannerView topcompanionBanner, CustomCompanionBannerView bottomCompanionBanner, Activity activity, Context context) {
         this.videoItem = videoItem;
         this.playerView = playerView;
         this.skipBtn = skipButton;
@@ -488,7 +488,6 @@ import java.util.List;
             exoPlayerInstance = new ExoPlayer.Builder(context).build();
         }
         exoPlayerInstance.addListener(playbackStateListener);
-
         exoPlayerInstance.setPlayWhenReady(playWhenReady);
         if (playAd) {
             exoPlayerInstance.setMediaSource(mediaSource, currentAdProgress);
@@ -497,7 +496,7 @@ import java.util.List;
         }
         exoPlayerInstance.prepare();
         playerView.setPlayer(exoPlayerInstance);
-
+        playerView.setKeepContentOnPlayerReset(true);
         //Assign an onTouchListener to player while displaying ad to support click through event.
         playerView.setOnClickListener(v -> {
             if (duringAd) {
@@ -539,7 +538,7 @@ import java.util.List;
         }
     }
 
-    @UnstableApi private MediaSource buildMediaSource(String uri) {
+    private MediaSource buildMediaSource(String uri) {
         // This is the MediaSource representing the media to be played.
         // Getting media from raw resource
 
@@ -566,7 +565,7 @@ import java.util.List;
     /**
      * Play/resume the selected video content.
      */
-    @UnstableApi private void playVideoContent() {
+    private void playVideoContent() {
         playVideoContent = true;
         mediaSource = buildMediaSource(videoItem.getContentUrl());
         initializePlayer();
