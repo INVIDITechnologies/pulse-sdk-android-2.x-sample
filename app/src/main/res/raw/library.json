@@ -1,9 +1,17 @@
 [{
   "tags":             ["standard-linears"],
   "category":         "skip-always",
-  "midroll-positions": [10, 20],
-  "content-title":    "KableOne",
+  "midroll-positions": [20, 50],
+  "content-title":    "KableOne_M3U8",
   "content-id":       "demo",
   "content-duration": 52,
   "content-url":      "https://media.kableone.com/Previews/jaspal/Aakad/master.m3u8"
+},{
+  "tags":             ["standard-linears"],
+  "category":         "skip-always",
+  "midroll-positions": [20, 50],
+  "content-title":    "Invidi_Test_MP4",
+  "content-id":       "demo",
+  "content-duration": 52,
+  "content-url":      "https://vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4"
 }]

@@ -488,14 +488,16 @@ import java.util.List;
             exoPlayerInstance = new ExoPlayer.Builder(context).build();
         }
         exoPlayerInstance.addListener(playbackStateListener);
+
         exoPlayerInstance.setPlayWhenReady(playWhenReady);
         if (playAd) {
-            exoPlayerInstance.seekTo(currentWindow, currentAdProgress);
+            exoPlayerInstance.setMediaSource(mediaSource, currentAdProgress);
         } else if (playVideoContent) {
-            exoPlayerInstance.seekTo(currentWindow, currentContentProgress);
+            exoPlayerInstance.setMediaSource(mediaSource, currentContentProgress);
         }
-        exoPlayerInstance.prepare(mediaSource, false, false);
+        exoPlayerInstance.prepare();
         playerView.setPlayer(exoPlayerInstance);
+
         //Assign an onTouchListener to player while displaying ad to support click through event.
         playerView.setOnClickListener(v -> {
             if (duringAd) {
