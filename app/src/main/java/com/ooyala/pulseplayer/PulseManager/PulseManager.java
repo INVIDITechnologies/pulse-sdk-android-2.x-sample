@@ -496,6 +496,7 @@ import java.util.List;
         }
         exoPlayerInstance.prepare();
         playerView.setPlayer(exoPlayerInstance);
+        playerView.setKeepContentOnPlayerReset(true);
         //Assign an onTouchListener to player while displaying ad to support click through event.
         playerView.setOnClickListener(v -> {
             if (duringAd) {
