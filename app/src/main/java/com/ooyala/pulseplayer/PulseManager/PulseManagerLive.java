@@ -393,6 +393,17 @@ public class PulseManagerLive implements PulseLiveSessionListener {
      */
     private RequestSettings getRequestSettings() {
         RequestSettings newRequestSettings = new RequestSettings();
+        if (videoItem.getContentTitle().contains("VAST response")){
+            Log.w(TAG, "Video item title (" + videoItem.getContentTitle() + ") contains 'VAST response', setting PulseAdResponseFormat to 'VAST'.");
+
+            newRequestSettings.setAdResponseFormat(RequestSettings.AdResponseFormat.VAST);
+            if (videoItem.getContentTitle().contains("Midroll")) {
+                newRequestSettings.setInsertionPointFilter(Collections.singletonList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
+            }
+            if (videoItem.getContentTitle().contains("external ad server")) {
+                newRequestSettings.setAdRequestVASTUrl("https://couvypudqpu2zp67eyuiot75x40bgygh.lambda-url.eu-north-1.on.aws/gampad/ads?cust_params=DirectLI_AdUnit%3D80fa4353-c339-4477-b940-736c407c5f0a");
+            }
+        }
         if (videoItem.getMidrollPositions() != null && videoItem.getMidrollPositions().length != 0) {
             for (int i = 0; i < videoItem.getMidrollPositions().length; i++) {
                 playbackPosition.add((float) videoItem.getMidrollPositions()[i]);
@@ -418,8 +429,19 @@ public class PulseManagerLive implements PulseLiveSessionListener {
         android.util.Log.i(TAG, "Request a session extension for two midRolls at 30s after previous midRoll break.");
         RequestSettings updatedRequestSettings = new RequestSettings();
         List<Float> newPlaybackPositions = new ArrayList<>();
-        newPlaybackPositions.add(!playbackPosition.isEmpty() ? (playbackPosition.get(playbackPosition.size() - 1) + 30) : 30);
-        newPlaybackPositions.add(!playbackPosition.isEmpty() ? (playbackPosition.get(playbackPosition.size() - 1) + 60) : 60);
+
+        if (videoItem.getContentTitle().contains("VAST response")){
+            Log.w(TAG, "Video item title (" + videoItem.getContentTitle() + ") contains 'VAST response', setting PulseAdResponseFormat to 'VAST'.");
+            updatedRequestSettings.setAdResponseFormat(RequestSettings.AdResponseFormat.VAST);
+            if (videoItem.getContentTitle().equals("Midroll from Pulse VAST response")) {
+                updatedRequestSettings.setInsertionPointFilter(Collections.singletonList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));
+                newPlaybackPositions.add(!playbackPosition.isEmpty() ? (playbackPosition.get(playbackPosition.size() - 1) + 30) : 30);
+            }
+        } else {
+            newPlaybackPositions.add(!playbackPosition.isEmpty() ? (playbackPosition.get(playbackPosition.size() - 1) + 30) : 30);
+            newPlaybackPositions.add(!playbackPosition.isEmpty() ? (playbackPosition.get(playbackPosition.size() - 1) + 60) : 60);
+        }
+
         updatedRequestSettings.setLinearPlaybackPositions(newPlaybackPositions);
         extendedPlaybackPositions = newPlaybackPositions;
         updatedRequestSettings.setInsertionPointFilter(Collections.singletonList(RequestSettings.InsertionPointType.PLAYBACK_POSITION));

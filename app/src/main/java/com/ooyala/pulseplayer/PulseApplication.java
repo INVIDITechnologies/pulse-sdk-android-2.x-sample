@@ -31,5 +31,6 @@ public class PulseApplication  extends Application {
         //     http://support.ooyala.com/developers/ad-documentation/oadtech/ad_serving/dg/integration_sdk_parameter.html
 
         Pulse.setPulseHost("https://pulse-demo.videoplaza.tv", null, null);
+//        Pulse.setPulseHost("https://aptest.adtech-union.tv", null, null);
     }
 }

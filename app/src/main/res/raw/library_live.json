@@ -5,6 +5,36 @@
   "content-url":       "https://vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4",
   "test-description": "No Ads will be returned either in createSession or extendSession"
 },{
+  "tags":              ["preroll1"],
+  "content-title":     "Preroll from Pulse - VAST response",
+  "midroll-positions": [],
+  "content-url":       "https://vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4",
+  "test-description":  "."
+},{
+  "tags":              ["midroll1"],
+  "content-title":     "Midroll from Pulse - VAST response",
+  "midroll-positions": [10],
+  "content-url":       "https://vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4",
+  "test-description":  "."
+},{
+  "tags":              ["vast2"],
+  "content-title":     "Preroll 'vast2' third party from Pulse - VAST response",
+  "midroll-positions": [],
+  "content-url":       "https://vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4",
+  "test-description":  "."
+},{
+  "tags":              ["vast3.0"],
+  "content-title":     "Midroll 'vast3.0' third party from Pulse - VAST response",
+  "midroll-positions": [5],
+  "content-url":       "https://vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4",
+  "test-description":  "."
+},{
+  "tags":              [],
+  "content-title":     "Midroll external ad server - VAST response",
+  "midroll-positions": [8],
+  "content-url":       "https://vp.videoplaza.tv/resources/media/sintel_trailer_854x480.mp4",
+  "test-description":  "."
+},{
   "tags":              ["standard-midrolls"],
   "content-title":     "Midroll",
   "midroll-positions": [10, 40],
